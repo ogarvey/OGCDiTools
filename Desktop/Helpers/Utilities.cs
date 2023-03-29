@@ -44,8 +44,8 @@ namespace Desktop.Helpers
           var U1 = (prevU + U2) / 2;
           var V1 = (prevV + V2) / 2;
 
-          var Y1 = prevY + dequantizer[y1];
-          var Y2 = Y1 + dequantizer[y2];
+          var Y1 = (prevY + dequantizer[y1]) % 256;
+          var Y2 = (Y1 + dequantizer[y2]) % 256;
 
           decodedPixels[0] = 0xFF;
           decodedPixels[1] = (byte)Y1; // r1
