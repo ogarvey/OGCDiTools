@@ -73,9 +73,9 @@ namespace Desktop.Helpers
     private static (int R, int G, int B) YUVtoRGB(int Y, int U, int V)
     {
 
-      int R = Clamp(Y * 256 + 351 * (V - 128) / 256);
-      int G = Clamp((Y * 256) * (86*(U-128)+179*(V-128)) / 256);
-      int B = Clamp(Y * 256 + 444 * (U - 128) / 256);
+      int R = Clamp((Y * 256 + 351 * (V - 128)) / 256);
+      int G = Clamp((Y * 256) * (86 * (U - 128) + 179 * (V - 128)) / 256);
+      int B = Clamp((Y * 256 + 444 * (U - 128)) / 256);
 
       return (R, G, B);
     }
