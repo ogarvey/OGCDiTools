@@ -49,23 +49,31 @@ namespace Desktop.Helpers
       byte prevY = (byte)((previous >> 16) & 0xFF);
       byte prevU = (byte)((previous >> 8) & 0xFF);
       byte prevV = (byte)(previous & 0xFF);
-
-      var Y = (prevY + dequantizer[y1]) % 256;
-      var U = (prevU + dequantizer[u1]) % 256;
-      var V = (prevV + dequantizer[v1]) % 256;
       
-      (int R, int G, int B) = YUVtoRGB(Y, U, V);
+      // u1 / v1 should be dequantized and added to prevU / prevV and will then give you the
+      // U / V values for the second pixel of the pair, those of the first pixel are the average
+      // of prevU / prevV and the new U/ V.The y1 value should be dequantized and added to prevY
+      // to give the Y value for the first pixel; add the dequantized y2  value to that to get the Y
+      // value for the second pixel.
+      
+      var U2 = (prevU + dequantizer[u1]) % 256;
+      var V2 = (prevV + dequantizer[v1]) % 256;
 
+      var U1 = (prevU + U2) / 2;
+      var V1 = (prevV + V2) / 2;
+
+      var Y1 = prevY + dequantizer[y1];
+      var Y2 = Y1 + dequantizer[y2];
       
       decodedPixels[0] = 0xFF;
-      decodedPixels[1] = (byte)(R); // r1
-      decodedPixels[2] = (byte)(G); // g1
-      decodedPixels[3] = (byte)(B); // b1
+      decodedPixels[1] = (byte)Y1; // r1
+      decodedPixels[2] = (byte)U1; // g1
+      decodedPixels[3] = (byte)V1; // b1
       
       decodedPixels[4] = 0xFF;
-      decodedPixels[5] = decodedPixels[1]; // r2
-      decodedPixels[6] = decodedPixels[2]; // g2
-      decodedPixels[7] = decodedPixels[3]; // b2
+      decodedPixels[5] = (byte)Y2; // r2
+      decodedPixels[6] = (byte)U2; // g2
+      decodedPixels[7] = (byte)V2; // b2
 
       return decodedPixels;
     }
