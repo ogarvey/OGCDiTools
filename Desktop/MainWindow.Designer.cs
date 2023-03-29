@@ -1,4 +1,8 @@
-﻿namespace Desktop
+﻿using Point = System.Drawing.Point;
+using Size = System.Drawing.Size;
+using SizeF = System.Drawing.SizeF;
+
+namespace Desktop
 {
   partial class MainWindow
   {

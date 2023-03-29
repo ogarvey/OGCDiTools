@@ -1,4 +1,8 @@
-﻿namespace Desktop.Views
+﻿using Point = System.Drawing.Point;
+using Size = System.Drawing.Size;
+using SizeF = System.Drawing.SizeF;
+
+namespace Desktop.Views
 {
   partial class HexForm
   {

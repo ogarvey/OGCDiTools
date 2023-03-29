@@ -10,6 +10,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using Color = System.Drawing.Color;
+using Point = System.Drawing.Point;
+using Size = System.Drawing.Size;
 
 namespace Desktop.Views
 {
@@ -313,7 +316,9 @@ namespace Desktop.Views
     private void loadDYUVbtn_Click(object sender, EventArgs e)
     {
       var bytes = binFileData.Skip(0x1800).Take(92160).ToArray();
-      var bitmap = Utilities.DecodeDYUVImage(bytes);
+      var pil = DyuvHelper.ToPIL(bytes,384,240);
+      var bitmap = DyuvHelper.ImageSharpToBitmap(pil);
+      //Utilities.DecodeDYUVImage(bytes);
       pictureBox1.Size = new Size(1536, 960);
       pictureBox1.Image = BitmapHelper.Scale4(bitmap);
       pictureBox1.Visible = true;
