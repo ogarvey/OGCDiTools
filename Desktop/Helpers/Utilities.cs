@@ -21,7 +21,42 @@ namespace Desktop.Helpers
           ushort encodedPixel = (ushort)((encodedData[encodedIndex] << 8) | encodedData[encodedIndex + 1]);
           encodedIndex += 2;
 
-          byte[] decodedPixels = DecodeDYUVPixel(encodedPixel, previous);
+          byte[] decodedPixels = new byte[8];
+
+          byte u1 = (byte)((encodedPixel & 0xF000) >> 12);
+          byte y1 = (byte)((encodedPixel & 0x0F00) >> 8);
+          byte v1 = (byte)((encodedPixel & 0x00F0) >> 4);
+          byte y2 = (byte)(encodedPixel & 0x000F);
+
+          byte prevY = (byte)((previous >> 16) & 0xFF);
+          byte prevU = (byte)((previous >> 8) & 0xFF);
+          byte prevV = (byte)(previous & 0xFF);
+
+          // u1 / v1 should be dequantized and added to prevU / prevV and will then give you the
+          // U / V values for the second pixel of the pair, those of the first pixel are the average
+          // of prevU / prevV and the new U/ V.The y1 value should be dequantized and added to prevY
+          // to give the Y value for the first pixel; add the dequantized y2  value to that to get the Y
+          // value for the second pixel.
+
+          var U2 = (prevU + dequantizer[u1]) % 256;
+          var V2 = (prevV + dequantizer[v1]) % 256;
+
+          var U1 = (prevU + U2) / 2;
+          var V1 = (prevV + V2) / 2;
+
+          var Y1 = prevY + dequantizer[y1];
+          var Y2 = Y1 + dequantizer[y2];
+
+          decodedPixels[0] = 0xFF;
+          decodedPixels[1] = (byte)Y1; // r1
+          decodedPixels[2] = (byte)U1; // g1
+          decodedPixels[3] = (byte)V1; // b1
+
+          decodedPixels[4] = 0xFF;
+          decodedPixels[5] = (byte)Y2; // r2
+          decodedPixels[6] = (byte)U2; // g2
+          decodedPixels[7] = (byte)V2; // b2
+
           int decodedIndex = (y * width + x) * 4;
           Array.Copy(decodedPixels, 0, decodedImage, decodedIndex, 8);
 
@@ -35,47 +70,6 @@ namespace Desktop.Helpers
       bitmap.UnlockBits(bitmapData);
 
       return bitmap;
-    }
-    
-    public static byte[] DecodeDYUVPixel(ushort pixel, uint previous)
-    {
-      byte[] decodedPixels = new byte[8];
-
-      byte u1 = (byte)((pixel & 0xF000) >> 12);
-      byte y1 = (byte)((pixel & 0x0F00) >> 8);
-      byte v1 = (byte)((pixel & 0x00F0) >> 4);
-      byte y2 = (byte)(pixel & 0x000F);
-      
-      byte prevY = (byte)((previous >> 16) & 0xFF);
-      byte prevU = (byte)((previous >> 8) & 0xFF);
-      byte prevV = (byte)(previous & 0xFF);
-      
-      // u1 / v1 should be dequantized and added to prevU / prevV and will then give you the
-      // U / V values for the second pixel of the pair, those of the first pixel are the average
-      // of prevU / prevV and the new U/ V.The y1 value should be dequantized and added to prevY
-      // to give the Y value for the first pixel; add the dequantized y2  value to that to get the Y
-      // value for the second pixel.
-      
-      var U2 = (prevU + dequantizer[u1]) % 256;
-      var V2 = (prevV + dequantizer[v1]) % 256;
-
-      var U1 = (prevU + U2) / 2;
-      var V1 = (prevV + V2) / 2;
-
-      var Y1 = prevY + dequantizer[y1];
-      var Y2 = Y1 + dequantizer[y2];
-      
-      decodedPixels[0] = 0xFF;
-      decodedPixels[1] = (byte)Y1; // r1
-      decodedPixels[2] = (byte)U1; // g1
-      decodedPixels[3] = (byte)V1; // b1
-      
-      decodedPixels[4] = 0xFF;
-      decodedPixels[5] = (byte)Y2; // r2
-      decodedPixels[6] = (byte)U2; // g2
-      decodedPixels[7] = (byte)V2; // b2
-
-      return decodedPixels;
     }
 
     private static (int R, int G, int B) YUVtoRGB(int Y, int U, int V)
