@@ -59,7 +59,7 @@ namespace Desktop.Helpers
           Array.Copy(data, offset + i * ChunkSize, chunk, 0, ChunkSize);
           byteArrayList.Add(chunk);
         }
-        offset += SkipSize + ChunkSize * NumChunks;
+        offset += ChunkSize * NumChunks;
 
         if (HasClutColorTable(byteArrayList, clutHeader))
         {

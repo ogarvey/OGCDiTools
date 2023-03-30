@@ -43,7 +43,7 @@ namespace Desktop.Views
         foreach (var file in mapFiles)
         {
           var newFile = Path.GetFileNameWithoutExtension(file) + ".png";
-          var path = Path.GetDirectoryName(filename) + @"/screens";
+          var path = Path.GetDirectoryName(filename) + @"/screens2";
           Directory.CreateDirectory(path);
           var outputFile = Path.Combine(path, newFile);
           _mapData = BinFileHelper.ReadMapBytes(File.ReadAllBytes(file));

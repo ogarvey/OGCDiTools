@@ -7,7 +7,7 @@ namespace Desktop.Helpers
     // Process should split into sectors, then combine into records (files)
     // we then want to process the records (files) and further split and group 
     // into the various types of files (audio, video, etc)
-    public static List<SectorInfo> ProcessRTFFile(byte[] fileData, string filename)
+    public static List<SectorInfo> ProcessRTFFileDataSectors(byte[] fileData, string filename)
     {
       const int ChunkSize = 2352;
       const int Offset = 16;
@@ -35,10 +35,9 @@ namespace Desktop.Helpers
 
         if (sectorInfo.IsEmptySector)
           continue;
-
-
+        
         sectorInfoList.Add(sectorInfo);
-
+        
         if (!sectorInfo.IsData)
           continue;
         // remove first 16 bytes and last 4 bytes of chunk
@@ -52,7 +51,8 @@ namespace Desktop.Helpers
           byte[] recordData = byteArrays.SelectMany(a => a).ToArray();
           recordArray.Add(recordData);
           // write record data to file
-          var recordFileName = Path.GetFileNameWithoutExtension(filename) + $"_{recordArray.Count}.bin";
+          var offsets = $"_{i - ((byteArrays.Count - 1) * ChunkSize)}_{i + ChunkSize}";
+          var recordFileName = Path.GetFileNameWithoutExtension(filename) + $"{offsets}_d_{recordArray.Count}.bin";
           var recordDir = Path.GetDirectoryName(filename) + "\\records\\" + Path.GetFileNameWithoutExtension(filename);
           Directory.CreateDirectory(recordDir);
           var recordFilePath = Path.Combine(recordDir, recordFileName);
@@ -69,6 +69,112 @@ namespace Desktop.Helpers
       }
 
       return sectorInfoList;
+    }
+
+    public static void ProcessRTFFileAudioSectors(byte[] fileData, string filename)
+    {
+      const int ChunkSize = 2352;
+      const int Offset = 16;
+      const int HeaderSize = 24;
+      List<SectorInfo> sectorInfoList = new List<SectorInfo>();
+
+      List<byte[]> byteArrays = new List<byte[]>();
+      List<byte[]> recordArray = new List<byte[]>();
+
+      for (int i = 0, j = 1; i < fileData.Length; i += ChunkSize)
+      {
+        byte[] chunk = new byte[ChunkSize];
+        int chunkSize = Math.Min(ChunkSize, fileData.Length - i);
+        Array.Copy(fileData, i, chunk, 0, chunkSize);
+
+        if (chunk.Length <= Offset + 4) continue;
+
+        var sectorInfo = new SectorInfo(Path.GetFileName(filename));
+        sectorInfo.SectorIndex = j;
+        sectorInfo.FileNumber = chunk[Offset];
+        sectorInfo.Channel = chunk[Offset + 1];
+        sectorInfo.SubMode = chunk[Offset + 2];
+        sectorInfo.CodingInformation = chunk[Offset + 3];
+
+        if (sectorInfo.IsEmptySector)
+          continue;
+        
+        if (!sectorInfo.IsAudio)
+          continue;
+        // remove first 16 bytes and last 4 bytes of chunk
+        chunk = chunk.Skip(HeaderSize).ToArray();
+        var bytesToTake = chunk.Length - 24;
+        chunk = chunk.Take(bytesToTake).ToArray();
+        byteArrays.Add(chunk);
+
+        if (sectorInfo.IsEOR)
+        {
+          byte[] recordData = byteArrays.SelectMany(a => a).ToArray();
+          recordArray.Add(recordData);
+          // write record data to file
+          var offsets = $"_{i - ((byteArrays.Count-1)*ChunkSize)}_{i + ChunkSize}"; 
+          var recordFileName = Path.GetFileNameWithoutExtension(filename) + $"{offsets}_a_{recordArray.Count}.bin";
+          var recordDir = Path.GetDirectoryName(filename) + "\\records\\" + Path.GetFileNameWithoutExtension(filename);
+          Directory.CreateDirectory(recordDir);
+          var recordFilePath = Path.Combine(recordDir, recordFileName);
+          File.WriteAllBytes(recordFilePath, recordData);
+          byteArrays.Clear();
+        }
+      }
+
+    }
+
+    public static void ProcessRTFFileVideoSectors(byte[] fileData, string filename)
+    {
+      const int ChunkSize = 2352;
+      const int Offset = 16;
+      const int HeaderSize = 24;
+      List<SectorInfo> sectorInfoList = new List<SectorInfo>();
+
+      List<byte[]> byteArrays = new List<byte[]>();
+      List<byte[]> recordArray = new List<byte[]>();
+
+      for (int i = 0, j = 1; i < fileData.Length; i += ChunkSize)
+      {
+        byte[] chunk = new byte[ChunkSize];
+        int chunkSize = Math.Min(ChunkSize, fileData.Length - i);
+        Array.Copy(fileData, i, chunk, 0, chunkSize);
+
+        if (chunk.Length <= Offset + 4) continue;
+
+        var sectorInfo = new SectorInfo(Path.GetFileName(filename));
+        sectorInfo.SectorIndex = j;
+        sectorInfo.FileNumber = chunk[Offset];
+        sectorInfo.Channel = chunk[Offset + 1];
+        sectorInfo.SubMode = chunk[Offset + 2];
+        sectorInfo.CodingInformation = chunk[Offset + 3];
+
+        if (sectorInfo.IsEmptySector)
+          continue;
+
+        if (!sectorInfo.IsVideo)
+          continue;
+        // remove first 16 bytes and last 4 bytes of chunk
+        chunk = chunk.Skip(HeaderSize).ToArray();
+        var bytesToTake = chunk.Length - 4;
+        chunk = chunk.Take(bytesToTake).ToArray();
+        byteArrays.Add(chunk);
+
+        if (sectorInfo.IsEOR || sectorInfo.IsEOF)
+        {
+          byte[] recordData = byteArrays.SelectMany(a => a).ToArray();
+          recordArray.Add(recordData);
+          // write record data to file
+          var offsets = $"_{i - ((byteArrays.Count - 1) * ChunkSize)}_{i + ChunkSize}";
+          var recordFileName = Path.GetFileNameWithoutExtension(filename) + $"{offsets}_v_{recordArray.Count}.bin";
+          var recordDir = Path.GetDirectoryName(filename) + "\\records\\" + Path.GetFileNameWithoutExtension(filename);
+          Directory.CreateDirectory(recordDir);
+          var recordFilePath = Path.Combine(recordDir, recordFileName);
+          File.WriteAllBytes(recordFilePath, recordData);
+          byteArrays.Clear();
+        }
+      }
+
     }
 
     private static List<byte[]> FindClutColorTable(byte[] data)

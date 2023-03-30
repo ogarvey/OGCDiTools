@@ -315,13 +315,20 @@ namespace Desktop.Views
 
     private void loadDYUVbtn_Click(object sender, EventArgs e)
     {
-      var bytes = binFileData.Length <= 92160 ? binFileData : binFileData.Skip(0x1800).Take(92160).ToArray();
-      var pil = DyuvHelper.ToPIL(bytes, 384, 240);
-      var bitmap = DyuvHelper.ImageSharpToBitmap(pil);
-      //var bitmap = Utilities.DecodeDYUVImage(bytes);
+      var bytesToRead = 92160;
+      var bytes = binFileData.Length <= bytesToRead ? binFileData : binFileData.Skip(0x1800).Take(bytesToRead).ToArray();
+      //var pil = DyuvHelper.ToPIL(bytes, 384, 240);
+      //var bitmap = DyuvHelper.ImageSharpToBitmap(pil);
+      var bitmap = Utilities.DecodeDYUVImage(bytes);
       pictureBox1.Size = new Size(1536, 960);
       pictureBox1.Image = BitmapHelper.Scale4(bitmap);
       pictureBox1.Visible = true;
+    }
+
+    private void streamDyuvBtn_Click(object sender, EventArgs e)
+    {
+      var sdForm = new StreamingDyuvForm(filename);
+      sdForm.Show();
     }
   }
 }

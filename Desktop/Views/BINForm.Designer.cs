@@ -47,6 +47,7 @@ namespace Desktop.Views
       textBox1 = new TextBox();
       parseBytesBtn = new Button();
       pictureBox1 = new PictureBox();
+      streamDyuvBtn = new Button();
       tableLayoutPanel1.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
       SuspendLayout();
@@ -57,6 +58,7 @@ namespace Desktop.Views
       tableLayoutPanel1.AutoSizeMode = AutoSizeMode.GrowAndShrink;
       tableLayoutPanel1.ColumnCount = 1;
       tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+      tableLayoutPanel1.Controls.Add(streamDyuvBtn, 0, 6);
       tableLayoutPanel1.Controls.Add(populateTileList, 0, 2);
       tableLayoutPanel1.Controls.Add(button1, 0, 0);
       tableLayoutPanel1.Controls.Add(clutButton, 0, 1);
@@ -67,23 +69,24 @@ namespace Desktop.Views
       tableLayoutPanel1.Location = new Point(0, 0);
       tableLayoutPanel1.Margin = new Padding(2);
       tableLayoutPanel1.Name = "tableLayoutPanel1";
-      tableLayoutPanel1.RowCount = 6;
-      tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 16.666666F));
-      tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 16.666666F));
-      tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 16.666666F));
-      tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 16.666666F));
-      tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 16.666666F));
-      tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 16.666666F));
+      tableLayoutPanel1.RowCount = 7;
+      tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 14.28531F));
+      tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 14.2853069F));
+      tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 14.2853069F));
+      tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 14.2853069F));
+      tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 14.2853069F));
+      tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 14.2853069F));
+      tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 14.2881641F));
       tableLayoutPanel1.Size = new Size(210, 1041);
       tableLayoutPanel1.TabIndex = 0;
       // 
       // populateTileList
       // 
       populateTileList.Dock = DockStyle.Fill;
-      populateTileList.Location = new Point(2, 348);
+      populateTileList.Location = new Point(2, 298);
       populateTileList.Margin = new Padding(2);
       populateTileList.Name = "populateTileList";
-      populateTileList.Size = new Size(206, 169);
+      populateTileList.Size = new Size(206, 144);
       populateTileList.TabIndex = 3;
       populateTileList.Text = "Load Tiles";
       populateTileList.UseVisualStyleBackColor = true;
@@ -95,7 +98,7 @@ namespace Desktop.Views
       button1.Location = new Point(2, 2);
       button1.Margin = new Padding(2);
       button1.Name = "button1";
-      button1.Size = new Size(206, 169);
+      button1.Size = new Size(206, 144);
       button1.TabIndex = 1;
       button1.Text = "Load BIN File";
       button1.UseVisualStyleBackColor = true;
@@ -104,10 +107,10 @@ namespace Desktop.Views
       // clutButton
       // 
       clutButton.Dock = DockStyle.Fill;
-      clutButton.Location = new Point(2, 175);
+      clutButton.Location = new Point(2, 150);
       clutButton.Margin = new Padding(2);
       clutButton.Name = "clutButton";
-      clutButton.Size = new Size(206, 169);
+      clutButton.Size = new Size(206, 144);
       clutButton.TabIndex = 2;
       clutButton.Text = "Load CLUT Palette";
       clutButton.UseVisualStyleBackColor = true;
@@ -116,10 +119,10 @@ namespace Desktop.Views
       // exportTilesBtn
       // 
       exportTilesBtn.Dock = DockStyle.Fill;
-      exportTilesBtn.Location = new Point(2, 521);
+      exportTilesBtn.Location = new Point(2, 446);
       exportTilesBtn.Margin = new Padding(2);
       exportTilesBtn.Name = "exportTilesBtn";
-      exportTilesBtn.Size = new Size(206, 169);
+      exportTilesBtn.Size = new Size(206, 144);
       exportTilesBtn.TabIndex = 4;
       exportTilesBtn.Text = "Export Tiles";
       exportTilesBtn.UseVisualStyleBackColor = true;
@@ -128,10 +131,10 @@ namespace Desktop.Views
       // loadMapBtn
       // 
       loadMapBtn.Dock = DockStyle.Fill;
-      loadMapBtn.Location = new Point(2, 694);
+      loadMapBtn.Location = new Point(2, 594);
       loadMapBtn.Margin = new Padding(2);
       loadMapBtn.Name = "loadMapBtn";
-      loadMapBtn.Size = new Size(206, 169);
+      loadMapBtn.Size = new Size(206, 144);
       loadMapBtn.TabIndex = 5;
       loadMapBtn.Text = "Load Map Data";
       loadMapBtn.UseVisualStyleBackColor = true;
@@ -140,9 +143,9 @@ namespace Desktop.Views
       // loadDYUVbtn
       // 
       loadDYUVbtn.Dock = DockStyle.Fill;
-      loadDYUVbtn.Location = new Point(3, 868);
+      loadDYUVbtn.Location = new Point(3, 743);
       loadDYUVbtn.Name = "loadDYUVbtn";
-      loadDYUVbtn.Size = new Size(204, 170);
+      loadDYUVbtn.Size = new Size(204, 142);
       loadDYUVbtn.TabIndex = 6;
       loadDYUVbtn.Text = "Load DYUV";
       loadDYUVbtn.UseVisualStyleBackColor = true;
@@ -203,12 +206,23 @@ namespace Desktop.Views
       // pictureBox1
       // 
       pictureBox1.Anchor = AnchorStyles.None;
-      pictureBox1.Location = new Point(217, 39);
+      pictureBox1.Location = new Point(1035, 7);
       pictureBox1.Name = "pictureBox1";
-      pictureBox1.Size = new Size(1536, 960);
+      pictureBox1.Size = new Size(857, 690);
       pictureBox1.TabIndex = 7;
       pictureBox1.TabStop = false;
       pictureBox1.Visible = false;
+      // 
+      // streamDyuvBtn
+      // 
+      streamDyuvBtn.Dock = DockStyle.Fill;
+      streamDyuvBtn.Location = new Point(3, 891);
+      streamDyuvBtn.Name = "streamDyuvBtn";
+      streamDyuvBtn.Size = new Size(204, 147);
+      streamDyuvBtn.TabIndex = 7;
+      streamDyuvBtn.Text = "Stream DYUV";
+      streamDyuvBtn.UseVisualStyleBackColor = true;
+      streamDyuvBtn.Click += streamDyuvBtn_Click;
       // 
       // BINForm
       // 
@@ -250,5 +264,6 @@ namespace Desktop.Views
     private Button loadMapBtn;
     private Button loadDYUVbtn;
     private PictureBox pictureBox1;
+    private Button streamDyuvBtn;
   }
 }
