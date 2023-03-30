@@ -34,7 +34,7 @@ namespace Desktop.Helpers
           int encodedPixel = ((encodedData[encodedIndex] << 8) | encodedData[encodedIndex + 1]);
 
           //parse encoded pixel to each delta value
-          byte dU1 = 0x00;//(byte)((encodedPixel & 0xF000) >> 12);
+          byte dU1 = (byte)((encodedPixel & 0xF000) >> 12);
           byte dY1 = (byte)((encodedPixel & 0x0F00) >> 8);
           byte dV1 = (byte)((encodedPixel & 0x00F0) >> 4);
           byte dY2 = (byte)(encodedPixel & 0x000F);
@@ -87,7 +87,7 @@ namespace Desktop.Helpers
     {
       //added additional parenthesis to ensure "/256" is done last
       int R = Clamp((Y * 256 + 351 * (V - 128)) / 256);
-      int G = Clamp(((Y * 256) * (86 * (U - 128) + 179 * (V - 128))) / 256);
+      int G = Clamp(((Y * 256) - (86 * (U - 128) + 179 * (V - 128))) / 256);
       int B = Clamp((Y * 256 + 444 * (U - 128)) / 256);
 
       return (R, G, B);
