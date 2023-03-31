@@ -6,10 +6,12 @@ using System.Data;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using Button = System.Windows.Forms.Button;
 using Color = System.Drawing.Color;
 using Point = System.Drawing.Point;
 using Size = System.Drawing.Size;
@@ -178,7 +180,8 @@ namespace Desktop.Views
 
     public void PopulatePotentialTileListView()
     {
-      tiles = BinFileHelper.ReadByteArrayIntoList(binFileData);
+      tiles = BinFileHelper.ReadScreenTiles(binFileData);
+      tiles.AddRange(BinFileHelper.ReadSpriteTiles(binFileData));
       foreach (var (tile, index) in tiles.WithIndex())
       {
         var item = new ListViewItem();
@@ -315,8 +318,7 @@ namespace Desktop.Views
 
     private void loadDYUVbtn_Click(object sender, EventArgs e)
     {
-      var bytesToRead = 92160;
-      var bytes = binFileData.Length <= bytesToRead ? binFileData : binFileData.Skip(0x1800).Take(bytesToRead).ToArray();
+      var bytes = GetDyuvBytes();
       //var pil = DyuvHelper.ToPIL(bytes, 384, 240);
       //var bitmap = DyuvHelper.ImageSharpToBitmap(pil);
       var bitmap = Utilities.DecodeDYUVImage(bytes);
@@ -324,6 +326,63 @@ namespace Desktop.Views
       pictureBox1.Image = BitmapHelper.Scale4(bitmap);
       pictureBox1.Visible = true;
     }
+
+    private byte[] GetDyuvBytes()
+    {
+      var bytesToRead = 92160;
+      if(binFileData.Length == bytesToRead)
+      {
+        return binFileData;
+      } else
+      {
+        var offset = PromptForHexOffset();
+        return binFileData.Skip(offset).Take(bytesToRead).ToArray();
+      }
+
+    }
+    private int PromptForHexOffset()
+    {
+      using (var dialog = new Form())
+      {
+        dialog.Text = "Enter Hex Offset";
+
+        var label = new Label();
+        label.Text = "Enter a hexadecimal offset:";
+        label.Location = new Point(10, 10);
+        dialog.Controls.Add(label);
+
+        var numericUpDown = new NumericUpDown();
+        numericUpDown.Hexadecimal = true;
+        numericUpDown.Location = new Point(10, 40);
+        numericUpDown.Maximum = decimal.MaxValue;
+        dialog.Controls.Add(numericUpDown);
+
+        var okButton = new Button();
+        okButton.Text = "OK";
+        okButton.DialogResult = DialogResult.OK;
+        okButton.Location = new Point(10, 70);
+        dialog.Controls.Add(okButton);
+
+        var cancelButton = new Button();
+        cancelButton.Text = "Cancel";
+        cancelButton.DialogResult = DialogResult.Cancel;
+        cancelButton.Location = new Point(90, 70);
+        dialog.Controls.Add(cancelButton);
+
+        dialog.AcceptButton = okButton;
+        dialog.CancelButton = cancelButton;
+
+        if (dialog.ShowDialog() == DialogResult.OK)
+        {
+          return (int)numericUpDown.Value;
+        }
+        else
+        {
+          return 0;
+        }
+      }
+    }
+
 
     private void streamDyuvBtn_Click(object sender, EventArgs e)
     {
