@@ -113,13 +113,13 @@ namespace Desktop.Helpers
       }
 
       hexString = hexString.Replace(" ", "").Replace("\r", "").Replace("\n", "");
-      if (hexString.Length != 128)
+      if (hexString.Length % 2 != 0)
       {
-        throw new ArgumentException("Input string must contain 64 bytes of hex data", nameof(hexString));
+        throw new ArgumentException("Input string must contain even number of bytes of hex data", nameof(hexString));
       }
 
       byte[] byteArray = new byte[hexString.Length / 2];
-      for (int i = 0; i < 64; i++)
+      for (int i = 0; i < hexString.Length/2; i++)
       {
         string byteString = hexString.Substring(i * 2, 2);
         byteArray[i] = byte.Parse(byteString, NumberStyles.HexNumber);

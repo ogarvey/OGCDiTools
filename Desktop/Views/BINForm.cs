@@ -1,6 +1,7 @@
 ﻿using Desktop.Helpers;
 using Microsoft.VisualBasic.Devices;
 using NAudio.Wave;
+using ReaLTaiizor.Controls;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -15,6 +16,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using static Desktop.Helpers.AudioHelper;
+using static ReaLTaiizor.Drawing.Poison.PoisonPaint.BackColor;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using Button = System.Windows.Forms.Button;
 using Color = System.Drawing.Color;
@@ -42,6 +44,7 @@ namespace Desktop.Views
       exportTilesBtn.Enabled = false;
       populateTileList.Enabled = false;
       loadMapBtn.Enabled = false;
+      dungeonTrackBar1.Enabled = false;
     }
 
     public void LoadCLUT()
@@ -165,8 +168,10 @@ namespace Desktop.Views
     {
       tileOutputPanel.Controls.Clear();
       int cellSize = 300 / 8; // Set the size of each grid cell
-      int numRows = 8; // Set the number of rows in the grid
-      int numCols = 8; // Set the number of columns in the grid
+      int numCols = 8; // Set the number of rows in the grid
+      int numRows = 8; // Set the number of columns in the grid
+
+      Bitmap bitmap = new Bitmap(cellSize * numCols, cellSize * numRows);
 
       for (int i = 0; i < numRows; i++)
       {
@@ -175,14 +180,24 @@ namespace Desktop.Views
           int index = i * numCols + j;
           Color color = colors[index];
 
-          PictureBox pictureBox = new PictureBox();
-          pictureBox.Location = new Point(j * (cellSize), i * (cellSize));
-          pictureBox.Size = new Size(cellSize, cellSize);
-          pictureBox.BackColor = color;
-          tileOutputPanel.Controls.Add(pictureBox);
+          for (int y = 0; y < cellSize; y++)
+          {
+            for (int x = 0; x < cellSize; x++)
+            {
+              int bitmapX = j * cellSize + x;
+              int bitmapY = i * cellSize + y;
+              bitmap.SetPixel(bitmapX, bitmapY, color);
+            }
+          }
         }
       }
 
+      PictureBox pictureBox = new PictureBox();
+      pictureBox.Size = bitmap.Size;
+      pictureBox.Image = bitmap;
+      tileOutputPanel.AutoSize = true;
+      tileOutputPanel.Size = bitmap.Size;
+      tileOutputPanel.Controls.Add(pictureBox);
     }
 
     public void PopulatePotentialTileListView()
@@ -197,7 +212,6 @@ namespace Desktop.Views
       }
       exportTilesBtn.Enabled = true;
     }
-
 
     public void LoadBinFolder()
     {
@@ -356,6 +370,7 @@ namespace Desktop.Views
       }
 
     }
+
     private (int, int) PromptForHexOffset()
     {
       using (var dialog = new Form())
@@ -412,7 +427,6 @@ namespace Desktop.Views
       }
     }
 
-
     static void ProcessAudioData(byte[] data, List<short> left, List<short> right)
     {
       // Call DecodeAudioSector here with the data parameter, left, and right
@@ -420,7 +434,7 @@ namespace Desktop.Views
       DecodeAudioSector(data, left, right);
     }
 
-    private async void previewAudioBtn_Click(object sender, EventArgs e)
+    private void previewAudioBtn_Click(object sender, EventArgs e)
     {
       List<short> left = new List<short>();
       List<short> right = new List<short>();
@@ -439,43 +453,66 @@ namespace Desktop.Views
       };
 
       PreviewWAV(header, left, right);
-
-      SaveFileDialog saveFileDialog = new SaveFileDialog
-      {
-        Filter = "WAV Files|*.wav",
-        Title = "Save a WAV File",
-      };
-
-      // Show the SaveFileDialog and, if the user clicks OK, save the WAV file
-      if (saveFileDialog.ShowDialog() == DialogResult.OK)
-      {
-        using (FileStream fileStream = new FileStream(saveFileDialog.FileName, FileMode.Create))
-        {
-          AudioHelper.WriteWAV(fileStream, header, left, right);
-        }
-
-        MessageBox.Show("WAV file saved successfully!");
-      }
     }
+
+    private WaveOut waveOut;
+    private WaveFileReader waveFileReader;
+
     private void PreviewWAV(WAVHeader header, List<short> left, List<short> right)
     {
-      if (soundPlayer != null && soundPlayer.Stream != null)
+      if (waveOut != null && waveOut.PlaybackState == PlaybackState.Playing)
       {
-        soundPlayer.Stop();
-        soundPlayer.Stream.Dispose();
-        soundPlayer.Stream = null;
-        memoryStream = null;
+        waveOut.Pause();
+        dungeonTrackBar1.Enabled = false;
+        return;
+      }
+      else if (waveOut != null && waveOut.PlaybackState == PlaybackState.Paused)
+      {
+        waveOut.Play();
+        dungeonTrackBar1.Enabled = true;
         return;
       }
 
       memoryStream = new MemoryStream();
       AudioHelper.WriteWAV(memoryStream, header, left, right);
-      memoryStream.Position = 0;
 
-      soundPlayer = new SoundPlayer(memoryStream);
-      soundPlayer.Load();
-      soundPlayer.Play();
+      memoryStream.Position = 0;
+      waveFileReader = new WaveFileReader(memoryStream);
+
+      waveOut = new WaveOut();
+      waveOut.Init(waveFileReader);
+      dungeonTrackBar1.Maximum = (int)waveFileReader.TotalTime.TotalSeconds;
+      waveOut.Play();
+      dungeonTrackBar1.Value = (int)waveFileReader.CurrentTime.TotalSeconds;
+      dungeonTrackBar1.Enabled = true;
+
     }
 
+    private void stopAudioBtn_Click(object sender, EventArgs e)
+    {
+      if (waveOut != null && waveOut.PlaybackState == PlaybackState.Playing)
+      {
+        waveOut.Stop();
+        dungeonTrackBar1.Enabled = false;
+      }
+    }
+
+    private void dungeonTrackBar1_ValueChanged()
+    {
+      if (waveFileReader != null)
+      {
+        // Seek the audio file to the new position based on the TrackBar value
+        waveFileReader.CurrentTime = TimeSpan.FromSeconds(dungeonTrackBar1.Value);
+      }
+    }
+
+    private void timer_Tick(object sender, EventArgs e)
+    {
+      if (waveFileReader != null && waveOut.PlaybackState == PlaybackState.Playing)
+      {
+        // Update the TrackBar value based on the current position of the playing audio
+        dungeonTrackBar1.Value = (int)waveFileReader.CurrentTime.TotalSeconds;
+      }
+    }
   }
 }
