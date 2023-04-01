@@ -10,10 +10,10 @@ namespace Desktop.Helpers
     private readonly static int[] dequantizer = { 0, 1, 4, 9, 16, 27, 44, 79, 128, 177, 212, 229, 240, 247, 252, 255 };
 
     //decode DYUV image to RGB bitmap
-    public static Bitmap DecodeDYUVImage(byte[] encodedData)
+    public static Bitmap DecodeDYUVImage(byte[] encodedData, int Width = 384, int Height = 240)
     {
       int encodedIndex = 0;                               //reader index
-      int width = 384, height = 240;                      //output dimensions
+      int width = Width, height = Height;                      //output dimensions
       byte[] decodedImage = new byte[width * height * 4]; //decoded image array
       uint initialY = 16;    //initial Y value (per line)
       uint initialU = 128;    //initial U value (per line)

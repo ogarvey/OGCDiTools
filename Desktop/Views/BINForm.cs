@@ -321,7 +321,14 @@ namespace Desktop.Views
       var bytes = GetDyuvBytes();
       //var pil = DyuvHelper.ToPIL(bytes, 384, 240);
       //var bitmap = DyuvHelper.ImageSharpToBitmap(pil);
-      var bitmap = Utilities.DecodeDYUVImage(bytes);
+      var bitmap = new Bitmap(384,240);
+      if (bytes.Length / 384 != 240)
+      {
+        bitmap = Utilities.DecodeDYUVImage(bytes, 384, bytes.Length / 384);
+      } else
+      {
+        bitmap = Utilities.DecodeDYUVImage(bytes);
+      }
       pictureBox1.Size = new Size(1536, 960);
       pictureBox1.Image = BitmapHelper.Scale4(bitmap);
       pictureBox1.Visible = true;
@@ -335,20 +342,21 @@ namespace Desktop.Views
         return binFileData;
       } else
       {
-        var offset = PromptForHexOffset();
-        return binFileData.Skip(offset).Take(bytesToRead).ToArray();
+        var (offset, toRead) = PromptForHexOffset();
+        return binFileData.Skip(offset).Take(toRead).ToArray();
       }
 
     }
-    private int PromptForHexOffset()
+    private (int, int) PromptForHexOffset()
     {
       using (var dialog = new Form())
       {
-        dialog.Text = "Enter Hex Offset";
+        dialog.Text = "Enter Hex Offset and bytes to read";
 
         var label = new Label();
         label.Text = "Enter a hexadecimal offset:";
         label.Location = new Point(10, 10);
+        label.AutoSize = true;
         dialog.Controls.Add(label);
 
         var numericUpDown = new NumericUpDown();
@@ -357,16 +365,28 @@ namespace Desktop.Views
         numericUpDown.Maximum = decimal.MaxValue;
         dialog.Controls.Add(numericUpDown);
 
+        var label2 = new Label();
+        label2.Text = "Enter the bytes to read:";
+        label2.Location = new Point(10, 80);
+        label2.AutoSize = true;
+        dialog.Controls.Add(label2);
+
+        var numericUpDown2 = new NumericUpDown();
+        numericUpDown2.Location = new Point(10, 110);
+        numericUpDown2.Maximum = 92160;
+        numericUpDown2.Value = 92160;
+        dialog.Controls.Add(numericUpDown2);
+
         var okButton = new Button();
         okButton.Text = "OK";
         okButton.DialogResult = DialogResult.OK;
-        okButton.Location = new Point(10, 70);
+        okButton.Location = new Point(50, 140);
         dialog.Controls.Add(okButton);
 
         var cancelButton = new Button();
         cancelButton.Text = "Cancel";
         cancelButton.DialogResult = DialogResult.Cancel;
-        cancelButton.Location = new Point(90, 70);
+        cancelButton.Location = new Point(110, 170);
         dialog.Controls.Add(cancelButton);
 
         dialog.AcceptButton = okButton;
@@ -374,11 +394,11 @@ namespace Desktop.Views
 
         if (dialog.ShowDialog() == DialogResult.OK)
         {
-          return (int)numericUpDown.Value;
+          return ((int)numericUpDown.Value, (int)numericUpDown2.Value);
         }
         else
         {
-          return 0;
+          return (0, 92160);
         }
       }
     }
