@@ -33,6 +33,7 @@ namespace Desktop.Views
     private void InitializeComponent()
     {
       tableLayoutPanel1 = new TableLayoutPanel();
+      previewAudioBtn = new Button();
       populateTileList = new Button();
       button1 = new Button();
       clutButton = new Button();
@@ -47,7 +48,6 @@ namespace Desktop.Views
       textBox1 = new TextBox();
       parseBytesBtn = new Button();
       pictureBox1 = new PictureBox();
-      streamDyuvBtn = new Button();
       tableLayoutPanel1.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
       SuspendLayout();
@@ -58,7 +58,7 @@ namespace Desktop.Views
       tableLayoutPanel1.AutoSizeMode = AutoSizeMode.GrowAndShrink;
       tableLayoutPanel1.ColumnCount = 1;
       tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
-      tableLayoutPanel1.Controls.Add(streamDyuvBtn, 0, 6);
+      tableLayoutPanel1.Controls.Add(previewAudioBtn, 0, 6);
       tableLayoutPanel1.Controls.Add(populateTileList, 0, 2);
       tableLayoutPanel1.Controls.Add(button1, 0, 0);
       tableLayoutPanel1.Controls.Add(clutButton, 0, 1);
@@ -79,6 +79,17 @@ namespace Desktop.Views
       tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 14.2881641F));
       tableLayoutPanel1.Size = new Size(210, 1041);
       tableLayoutPanel1.TabIndex = 0;
+      // 
+      // previewAudioBtn
+      // 
+      previewAudioBtn.Dock = DockStyle.Fill;
+      previewAudioBtn.Location = new Point(3, 891);
+      previewAudioBtn.Name = "previewAudioBtn";
+      previewAudioBtn.Size = new Size(204, 147);
+      previewAudioBtn.TabIndex = 7;
+      previewAudioBtn.Text = "Preview Audio";
+      previewAudioBtn.UseVisualStyleBackColor = true;
+      previewAudioBtn.Click += previewAudioBtn_Click;
       // 
       // populateTileList
       // 
@@ -213,17 +224,6 @@ namespace Desktop.Views
       pictureBox1.TabStop = false;
       pictureBox1.Visible = false;
       // 
-      // streamDyuvBtn
-      // 
-      streamDyuvBtn.Dock = DockStyle.Fill;
-      streamDyuvBtn.Location = new Point(3, 891);
-      streamDyuvBtn.Name = "streamDyuvBtn";
-      streamDyuvBtn.Size = new Size(204, 147);
-      streamDyuvBtn.TabIndex = 7;
-      streamDyuvBtn.Text = "Stream DYUV";
-      streamDyuvBtn.UseVisualStyleBackColor = true;
-      streamDyuvBtn.Click += streamDyuvBtn_Click;
-      // 
       // BINForm
       // 
       AutoScaleDimensions = new SizeF(7F, 15F);
@@ -264,6 +264,6 @@ namespace Desktop.Views
     private Button loadMapBtn;
     private Button loadDYUVbtn;
     private PictureBox pictureBox1;
-    private Button streamDyuvBtn;
+    private Button previewAudioBtn;
   }
 }

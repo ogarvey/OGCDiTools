@@ -1,15 +1,20 @@
 ﻿using Desktop.Helpers;
+using Microsoft.VisualBasic.Devices;
+using NAudio.Wave;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.IO;
 using System.Linq;
+using System.Media;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static Desktop.Helpers.AudioHelper;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using Button = System.Windows.Forms.Button;
 using Color = System.Drawing.Color;
@@ -25,6 +30,8 @@ namespace Desktop.Views
     private List<byte[]> tiles;
     private bool isPaletteLoaded = false;
     private bool isBinLoaded = false;
+    private SoundPlayer soundPlayer;
+    private MemoryStream memoryStream;
 
     public string filename;
     private byte[] binFileData;
@@ -321,11 +328,12 @@ namespace Desktop.Views
       var bytes = GetDyuvBytes();
       //var pil = DyuvHelper.ToPIL(bytes, 384, 240);
       //var bitmap = DyuvHelper.ImageSharpToBitmap(pil);
-      var bitmap = new Bitmap(384,240);
+      var bitmap = new Bitmap(384, 240);
       if (bytes.Length / 384 != 240)
       {
         bitmap = Utilities.DecodeDYUVImage(bytes, 384, bytes.Length / 384);
-      } else
+      }
+      else
       {
         bitmap = Utilities.DecodeDYUVImage(bytes);
       }
@@ -337,10 +345,11 @@ namespace Desktop.Views
     private byte[] GetDyuvBytes()
     {
       var bytesToRead = 92160;
-      if(binFileData.Length == bytesToRead)
+      if (binFileData.Length == bytesToRead)
       {
         return binFileData;
-      } else
+      }
+      else
       {
         var (offset, toRead) = PromptForHexOffset();
         return binFileData.Skip(offset).Take(toRead).ToArray();
@@ -404,10 +413,69 @@ namespace Desktop.Views
     }
 
 
-    private void streamDyuvBtn_Click(object sender, EventArgs e)
+    static void ProcessAudioData(byte[] data, List<short> left, List<short> right)
     {
-      var sdForm = new StreamingDyuvForm(filename);
-      sdForm.Show();
+      // Call DecodeAudioSector here with the data parameter, left, and right
+      // ...
+      DecodeAudioSector(data, left, right);
     }
+
+    private async void previewAudioBtn_Click(object sender, EventArgs e)
+    {
+      List<short> left = new List<short>();
+      List<short> right = new List<short>();
+
+      for (int i = 0; i < binFileData.Length; i += 2304)
+      {
+        byte[] chunk = new byte[2304];
+        Array.Copy(binFileData, i, chunk, 0, 2304);
+        ProcessAudioData(chunk, left, right);
+      }
+
+      WAVHeader header = new WAVHeader
+      {
+        ChannelNumber = 1, // Mono
+        Frequency = 18900, // 18.9 kHz
+      };
+
+      PreviewWAV(header, left, right);
+
+      SaveFileDialog saveFileDialog = new SaveFileDialog
+      {
+        Filter = "WAV Files|*.wav",
+        Title = "Save a WAV File",
+      };
+
+      // Show the SaveFileDialog and, if the user clicks OK, save the WAV file
+      if (saveFileDialog.ShowDialog() == DialogResult.OK)
+      {
+        using (FileStream fileStream = new FileStream(saveFileDialog.FileName, FileMode.Create))
+        {
+          AudioHelper.WriteWAV(fileStream, header, left, right);
+        }
+
+        MessageBox.Show("WAV file saved successfully!");
+      }
+    }
+    private void PreviewWAV(WAVHeader header, List<short> left, List<short> right)
+    {
+      if (soundPlayer != null && soundPlayer.Stream != null)
+      {
+        soundPlayer.Stop();
+        soundPlayer.Stream.Dispose();
+        soundPlayer.Stream = null;
+        memoryStream = null;
+        return;
+      }
+
+      memoryStream = new MemoryStream();
+      AudioHelper.WriteWAV(memoryStream, header, left, right);
+      memoryStream.Position = 0;
+
+      soundPlayer = new SoundPlayer(memoryStream);
+      soundPlayer.Load();
+      soundPlayer.Play();
+    }
+
   }
 }
