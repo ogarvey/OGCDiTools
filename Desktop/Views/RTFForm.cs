@@ -39,7 +39,7 @@ namespace Desktop.Views
         {
           fileData = File.ReadAllBytes(filename);
           fileSectors = CdiFileHelper.ProcessRTFFileDataSectors(fileData, filename);
-          CdiFileHelper.ProcessRTFFileAudioSectors(fileData, filename);
+          CdiFileHelper.ProcessRTFFileAudioSectors3(fileData, filename);
           UpdateStats();
         }
         catch (Exception)
