@@ -1,4 +1,5 @@
 ﻿using Desktop.Helpers;
+using Desktop.Views.Imagery;
 using Microsoft.VisualBasic.Devices;
 using NAudio.Wave;
 using ReaLTaiizor.Controls;
@@ -32,7 +33,6 @@ namespace Desktop.Views
     private List<byte[]> tiles;
     private bool isPaletteLoaded = false;
     private bool isBinLoaded = false;
-    private SoundPlayer soundPlayer;
     private MemoryStream memoryStream;
 
     public string filename;
@@ -41,7 +41,6 @@ namespace Desktop.Views
     public BINForm()
     {
       InitializeComponent();
-      exportTilesBtn.Enabled = false;
       populateTileList.Enabled = false;
       loadMapBtn.Enabled = false;
       dungeonTrackBar1.Enabled = false;
@@ -114,6 +113,7 @@ namespace Desktop.Views
         try
         {
           binFileData = File.ReadAllBytes(filename);
+          var output = Utilities.Contains808FSequence(binFileData);
           if (binFileData.Length > 0)
           {
             isBinLoaded = true;
@@ -210,7 +210,7 @@ namespace Desktop.Views
         item.Text = $"Tile {index}";
         potentialTileListView.Items.Add(item);
       }
-      exportTilesBtn.Enabled = true;
+      tileEditorBtn.Enabled = true;
     }
 
     public void LoadBinFolder()
@@ -295,7 +295,8 @@ namespace Desktop.Views
 
     private void exportTilesBtn_Click(object sender, EventArgs e)
     {
-      ExportTiles();
+      var tileEditor = new TilePlaygroundForm(binFileData);
+      tileEditor.Show();
     }
 
     private void parseBytesBtn_Click(object sender, EventArgs e)
@@ -431,7 +432,7 @@ namespace Desktop.Views
     {
       // Call DecodeAudioSector here with the data parameter, left, and right
       // ...
-      DecodeAudioSector(data, left, right);
+      DecodeAudioSector(data, left, right, false, true);
     }
 
     private void previewAudioBtn_Click(object sender, EventArgs e)
@@ -448,8 +449,8 @@ namespace Desktop.Views
 
       WAVHeader header = new WAVHeader
       {
-        ChannelNumber = 1, // Mono
-        Frequency = 18900, // 18.9 kHz
+        ChannelNumber = 2, // Mono
+        Frequency = 37800, // 18.9 kHz
       };
 
       PreviewWAV(header, left, right);

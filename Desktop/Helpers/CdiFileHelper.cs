@@ -71,7 +71,7 @@ namespace Desktop.Helpers
       return sectorInfoList;
     }
 
-    public static void ProcessRTFFileAudioSectors(byte[] fileData, string filename)
+    public static void ProcessRTFFileStereoAudioSectors(byte[] fileData, string filename)
     {
       const int ChunkSize = 2352;
       const int Offset = 16;
@@ -100,6 +100,9 @@ namespace Desktop.Helpers
           continue;
 
         if (!sectorInfo.IsAudio)
+          continue;
+
+        if (sectorInfo.IsMono)
           continue;
         // remove first 16 bytes and last 4 bytes of chunk
         chunk = chunk.Skip(HeaderSize).ToArray();
@@ -117,15 +120,15 @@ namespace Desktop.Helpers
         byte[] recordData = byteArrays[channel].SelectMany(a => a).ToArray();
         recordArray.Add(recordData);
         // write record data to file
-        var recordFileName = Path.GetFileNameWithoutExtension(filename) + $"_a_{recordArray.Count}.bin";
-        var recordDir = Path.GetDirectoryName(filename) + "\\records\\" + Path.GetFileNameWithoutExtension(filename);
+        var recordFileName = Path.GetFileNameWithoutExtension(filename) + $"_stereo_a_{recordArray.Count}.bin";
+        var recordDir = Path.GetDirectoryName(filename) + "\\records\\audio\\" + Path.GetFileNameWithoutExtension(filename);
         Directory.CreateDirectory(recordDir);
         var recordFilePath = Path.Combine(recordDir, recordFileName);
         File.WriteAllBytes(recordFilePath, recordData);
       }
     }
 
-    public static void ProcessRTFFileAudioSectors3(byte[] fileData, string filename)
+    public static void ProcessRTFFileMonoAudioSectors(byte[] fileData, string filename)
     {
       const int ChunkSize = 2352;
       const int Offset = 16;
@@ -155,6 +158,9 @@ namespace Desktop.Helpers
 
         if (!sectorInfo.IsAudio)
           continue;
+
+        if (!sectorInfo.IsMono)
+          continue;
         // remove first 16 bytes and last 4 bytes of chunk
         chunk = chunk.Skip(HeaderSize).ToArray();
         var bytesToTake = chunk.Length - 24;
@@ -165,80 +171,20 @@ namespace Desktop.Helpers
           byteArrays[sectorInfo.Channel] = new List<byte[]>();
         }
         byteArrays[sectorInfo.Channel].Add(chunk);
-
-        if (sectorInfo.IsEOR)
-        {
-          foreach (var channel in byteArrays.Keys)
-          {
-            byte[] recordData = byteArrays[channel].SelectMany(a => a).ToArray();
-            recordArray.Add(recordData);
-            // write record data to file
-            var offsets = $"_{i - ((byteArrays[channel].Count - 1) * ChunkSize)}_{i + ChunkSize}";
-            var recordFileName = Path.GetFileNameWithoutExtension(filename) + $"{offsets}_a_{recordArray.Count}.bin";
-            var recordDir = Path.GetDirectoryName(filename) + "\\records\\" + Path.GetFileNameWithoutExtension(filename);
-            Directory.CreateDirectory(recordDir);
-            var recordFilePath = Path.Combine(recordDir, recordFileName);
-            File.WriteAllBytes(recordFilePath, recordData);
-          }
-          byteArrays.Clear();
-        }
       }
-    }
-
-    public static void ProcessRTFFileAudioSectors2(byte[] fileData, string filename)
-    {
-      const int ChunkSize = 2352;
-      const int Offset = 16;
-      const int HeaderSize = 24;
-      List<SectorInfo> sectorInfoList = new List<SectorInfo>();
-
-      List<byte[]> byteArrays = new List<byte[]>();
-      List<byte[]> recordArray = new List<byte[]>();
-
-      for (int i = 0, j = 1; i < fileData.Length; i += ChunkSize)
+      foreach (var channel in byteArrays.Keys)
       {
-        byte[] chunk = new byte[ChunkSize];
-        int chunkSize = Math.Min(ChunkSize, fileData.Length - i);
-        Array.Copy(fileData, i, chunk, 0, chunkSize);
-
-        if (chunk.Length <= Offset + 4) continue;
-
-        var sectorInfo = new SectorInfo(Path.GetFileName(filename));
-        sectorInfo.SectorIndex = j;
-        sectorInfo.FileNumber = chunk[Offset];
-        sectorInfo.Channel = chunk[Offset + 1];
-        sectorInfo.SubMode = chunk[Offset + 2];
-        sectorInfo.CodingInformation = chunk[Offset + 3];
-
-        if (sectorInfo.IsEmptySector)
-          continue;
-        
-        if (!sectorInfo.IsAudio)
-          continue;
-        
-        // remove first 16 bytes and last 4 bytes of chunk
-        chunk = chunk.Skip(HeaderSize).ToArray();
-        var bytesToTake = chunk.Length - 24;
-        chunk = chunk.Take(bytesToTake).ToArray();
-        byteArrays.Add(chunk);
-
-        if (sectorInfo.IsEOR)
-        {
-          byte[] recordData = byteArrays.SelectMany(a => a).ToArray();
-          recordArray.Add(recordData);
-          // write record data to file
-          var offsets = $"_{i - ((byteArrays.Count-1)*ChunkSize)}_{i + ChunkSize}"; 
-          var recordFileName = Path.GetFileNameWithoutExtension(filename) + $"{offsets}_a_{recordArray.Count}.bin";
-          var recordDir = Path.GetDirectoryName(filename) + "\\records\\" + Path.GetFileNameWithoutExtension(filename);
-          Directory.CreateDirectory(recordDir);
-          var recordFilePath = Path.Combine(recordDir, recordFileName);
-          File.WriteAllBytes(recordFilePath, recordData);
-          byteArrays.Clear();
-        }
+        byte[] recordData = byteArrays[channel].SelectMany(a => a).ToArray();
+        recordArray.Add(recordData);
+        // write record data to file
+        var recordFileName = Path.GetFileNameWithoutExtension(filename) + $"_mono_a_{recordArray.Count}.bin";
+        var recordDir = Path.GetDirectoryName(filename) + "\\records\\audio\\" + Path.GetFileNameWithoutExtension(filename);
+        Directory.CreateDirectory(recordDir);
+        var recordFilePath = Path.Combine(recordDir, recordFileName);
+        File.WriteAllBytes(recordFilePath, recordData);
       }
-
     }
-
+    
     public static void ProcessRTFFileVideoSectors(byte[] fileData, string filename)
     {
       const int ChunkSize = 2352;
@@ -267,7 +213,7 @@ namespace Desktop.Helpers
         if (sectorInfo.IsEmptySector)
           continue;
 
-        if (!sectorInfo.IsVideo)
+        if (!sectorInfo.IsVideo || !sectorInfo.IsData)
           continue;
         // remove first 16 bytes and last 4 bytes of chunk
         chunk = chunk.Skip(HeaderSize).ToArray();

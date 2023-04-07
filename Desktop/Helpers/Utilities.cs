@@ -7,6 +7,38 @@ namespace Desktop.Helpers
 {
   public static class Utilities
   {
+    public static int[] Contains808FSequence(byte[] data)
+    {
+      const int MaxSequenceLength = 64;
+      byte[] sequence = new byte[MaxSequenceLength];
+      int sequenceLength = 0;
+      int[] offsets = new int[65535];
+      int foundOffsets = 0;
+
+      for (int i = 0; i < data.Length; i++)
+      {
+        if (data[i] >= 0x01 && data[i] <= 0x1A)
+        {
+          sequence[sequenceLength++] = data[i];
+
+          if (sequenceLength == MaxSequenceLength)
+          {
+            // Found a sequence of 64 bytes
+            offsets[foundOffsets++] = i - MaxSequenceLength;
+            sequenceLength = 0;
+          }
+        }
+        else
+        {
+          // Reset the current sequence
+          sequenceLength = 0;
+        }
+      }
+
+      // No sequence of 64 bytes found
+      return offsets;
+    }
+
     private readonly static int[] dequantizer = { 0, 1, 4, 9, 16, 27, 44, 79, 128, 177, 212, 229, 240, 247, 252, 255 };
 
     //decode DYUV image to RGB bitmap

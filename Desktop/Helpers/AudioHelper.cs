@@ -119,7 +119,7 @@ namespace Desktop.Helpers
       }
     }
     
-    public static ushort DecodeAudioSector(byte[] data, List<short> left, List<short> right, bool levelA = false, bool stereo = false)
+    public static ushort DecodeAudioSector(byte[] data, List<short> left, List<short> right, bool levelA, bool stereo)
     {
       ushort index = 0;
       if (levelA) // Level A (8 bits per sample)

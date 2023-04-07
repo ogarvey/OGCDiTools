@@ -28,6 +28,22 @@ namespace Desktop.Views
         Filter = "RTF files (*.rtf)|*.rtf",
         Title = "Open RTF file"
       };
+      if (openFileDialog1.ShowDialog() == DialogResult.OK)
+      {
+        this.Text = filename = openFileDialog1.FileName;
+        try
+        {
+          fileData = File.ReadAllBytes(filename);
+          fileSectors = CdiFileHelper.ProcessRTFFileDataSectors(fileData, filename);
+          CdiFileHelper.ProcessRTFFileStereoAudioSectors(fileData, filename);
+          UpdateStats();
+        }
+        catch (Exception)
+        {
+
+          throw;
+        }
+      }
     }
 
     private void button1_Click(object sender, EventArgs e)
@@ -39,7 +55,9 @@ namespace Desktop.Views
         {
           fileData = File.ReadAllBytes(filename);
           fileSectors = CdiFileHelper.ProcessRTFFileDataSectors(fileData, filename);
-          CdiFileHelper.ProcessRTFFileAudioSectors(fileData, filename);
+          CdiFileHelper.ProcessRTFFileStereoAudioSectors(fileData, filename);
+          CdiFileHelper.ProcessRTFFileMonoAudioSectors(fileData, filename);
+          CdiFileHelper.ProcessRTFFileVideoSectors(fileData, filename);
           UpdateStats();
         }
         catch (Exception)
@@ -62,26 +80,18 @@ namespace Desktop.Views
     {
       if (fileData != null && !string.IsNullOrEmpty(filename))
       {
-        HexForm hexEditorForm = new HexForm(filename, fileData);
-        hexEditorForm.Show();
-      } else
-      {
-        MessageBox.Show("Couldn't load file data");
+        FormHelper.hexButton_Click(fileData, filename);
       }
     }
 
     private void UpdateStats()
     {
       var totalSectors = fileSectors?.Count;
-      lblTotalSectors.Text = $"{lblTotalSectors.Text} {totalSectors}";
       var totalRecords = fileSectors?.Where((fs) => fs.IsEOR).Count();
-      lblTotalRecords.Text = $"{lblTotalRecords.Text} {totalRecords}";
       var videoSectorCount = fileSectors?.Where((fs) => fs.IsVideo).Count();
-      lblVideoSectors.Text = $"{lblVideoSectors.Text} {videoSectorCount}";
-      var audioSectorCount = fileSectors?.Where((fs) => fs.IsAudio).Count();
-      lblAudioSectors.Text = $"{lblAudioSectors.Text} {audioSectorCount}";
+      var monoAudioSectorCount = fileSectors?.Where((fs) => fs.IsAudio).Count();
+      var stereoAudioSectorCount = fileSectors?.Where((fs) => fs.IsAudio).Count();
       var dataSectorCount = fileSectors?.Where((fs) => fs.IsData).Count();
-      lblDataSectors.Text = $"{lblDataSectors.Text} {dataSectorCount}";
     }
 
     private void PopulateBinFiles()

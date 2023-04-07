@@ -1,4 +1,5 @@
 using Desktop.Views;
+using Desktop.Views.Data;
 
 namespace Desktop
 {
@@ -7,6 +8,7 @@ namespace Desktop
     public MainWindow()
     {
       InitializeComponent();
+      this.Size = Screen.PrimaryScreen.WorkingArea.Size;
     }
 
     private void button1_Click(object sender, EventArgs e)
@@ -21,6 +23,20 @@ namespace Desktop
     {
       BINForm bin = new BINForm();
       bin.Show();
+    }
+
+    private void spaceButton1_Click(object sender, EventArgs e)
+    {
+      var mainDataForm = new MainDataForm();
+      mainDataForm.TopLevel = false;
+      splitContainer1.Panel2.Controls.Add(mainDataForm);
+      mainDataForm.Dock = DockStyle.Fill;
+      mainDataForm.Show();
+    }
+
+    private void exitBtn_Click(object sender, EventArgs e)
+    {
+      this.Close();
     }
   }
 }

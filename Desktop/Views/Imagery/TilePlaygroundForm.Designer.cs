@@ -1,6 +1,6 @@
 ﻿namespace Desktop.Views.Imagery
 {
-  partial class TileEditorForm
+  partial class TilePlaygroundForm
   {
     /// <summary>
     /// Required designer variable.
@@ -34,11 +34,15 @@
       screenTileTabControl = new ReaLTaiizor.Controls.MaterialTabControl();
       screenTileTab = new TabPage();
       spriteTileTab = new TabPage();
+      spriteTileListView = new ReaLTaiizor.Controls.MaterialListView();
       tableLayoutPanel2 = new TableLayoutPanel();
       materialLabel1 = new ReaLTaiizor.Controls.MaterialLabel();
+      clutPalettePanel = new Panel();
+      folderBrowserDialog1 = new FolderBrowserDialog();
       tableLayoutPanel1.SuspendLayout();
       screenTileTabControl.SuspendLayout();
       screenTileTab.SuspendLayout();
+      spriteTileTab.SuspendLayout();
       tableLayoutPanel2.SuspendLayout();
       SuspendLayout();
       // 
@@ -57,7 +61,7 @@
       screenTileListView.MouseState = ReaLTaiizor.Helper.MaterialDrawHelper.MaterialMouseState.OUT;
       screenTileListView.Name = "screenTileListView";
       screenTileListView.OwnerDraw = true;
-      screenTileListView.Size = new System.Drawing.Size(419, 856);
+      screenTileListView.Size = new System.Drawing.Size(522, 856);
       screenTileListView.TabIndex = 0;
       screenTileListView.UseCompatibleStateImageBehavior = false;
       screenTileListView.View = View.Details;
@@ -81,22 +85,25 @@
       clutComboBox.MaxDropDownItems = 4;
       clutComboBox.MouseState = ReaLTaiizor.Helper.MaterialDrawHelper.MaterialMouseState.OUT;
       clutComboBox.Name = "clutComboBox";
-      clutComboBox.Size = new System.Drawing.Size(427, 49);
+      clutComboBox.Size = new System.Drawing.Size(530, 49);
       clutComboBox.StartIndex = 0;
       clutComboBox.TabIndex = 1;
+      clutComboBox.SelectedIndexChanged += clutComboBox_SelectedIndexChanged;
       // 
       // tableLayoutPanel1
       // 
-      tableLayoutPanel1.ColumnCount = 1;
-      tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+      tableLayoutPanel1.ColumnCount = 2;
+      tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 67F));
+      tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33F));
       tableLayoutPanel1.Controls.Add(screenTileTabControl, 0, 1);
       tableLayoutPanel1.Controls.Add(tableLayoutPanel2, 0, 0);
+      tableLayoutPanel1.Controls.Add(clutPalettePanel, 1, 0);
       tableLayoutPanel1.Location = new System.Drawing.Point(12, 12);
       tableLayoutPanel1.Name = "tableLayoutPanel1";
       tableLayoutPanel1.RowCount = 2;
       tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 15F));
       tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 85F));
-      tableLayoutPanel1.Size = new System.Drawing.Size(439, 1065);
+      tableLayoutPanel1.Size = new System.Drawing.Size(810, 1065);
       tableLayoutPanel1.TabIndex = 2;
       // 
       // screenTileTabControl
@@ -110,8 +117,9 @@
       screenTileTabControl.Multiline = true;
       screenTileTabControl.Name = "screenTileTabControl";
       screenTileTabControl.SelectedIndex = 0;
-      screenTileTabControl.Size = new System.Drawing.Size(433, 900);
-      screenTileTabControl.TabIndex = 3;
+      screenTileTabControl.Size = new System.Drawing.Size(536, 900);
+      screenTileTabControl.SizeMode = TabSizeMode.FillToRight;
+      screenTileTabControl.TabIndex = 2;
       // 
       // screenTileTab
       // 
@@ -119,20 +127,40 @@
       screenTileTab.Location = new System.Drawing.Point(4, 34);
       screenTileTab.Name = "screenTileTab";
       screenTileTab.Padding = new Padding(3);
-      screenTileTab.Size = new System.Drawing.Size(425, 862);
+      screenTileTab.Size = new System.Drawing.Size(528, 862);
       screenTileTab.TabIndex = 0;
       screenTileTab.Text = "Screen Tiles";
       screenTileTab.UseVisualStyleBackColor = true;
       // 
       // spriteTileTab
       // 
+      spriteTileTab.Controls.Add(spriteTileListView);
       spriteTileTab.Location = new System.Drawing.Point(4, 34);
       spriteTileTab.Name = "spriteTileTab";
       spriteTileTab.Padding = new Padding(3);
-      spriteTileTab.Size = new System.Drawing.Size(425, 862);
+      spriteTileTab.Size = new System.Drawing.Size(528, 862);
       spriteTileTab.TabIndex = 1;
       spriteTileTab.Text = "Sprite Tiles";
       spriteTileTab.UseVisualStyleBackColor = true;
+      // 
+      // spriteTileListView
+      // 
+      spriteTileListView.AutoSizeTable = false;
+      spriteTileListView.BackColor = System.Drawing.Color.FromArgb(255, 255, 255);
+      spriteTileListView.BorderStyle = BorderStyle.None;
+      spriteTileListView.Depth = 0;
+      spriteTileListView.Dock = DockStyle.Fill;
+      spriteTileListView.FullRowSelect = true;
+      spriteTileListView.Location = new System.Drawing.Point(3, 3);
+      spriteTileListView.MinimumSize = new System.Drawing.Size(200, 100);
+      spriteTileListView.MouseLocation = new System.Drawing.Point(-1, -1);
+      spriteTileListView.MouseState = ReaLTaiizor.Helper.MaterialDrawHelper.MaterialMouseState.OUT;
+      spriteTileListView.Name = "spriteTileListView";
+      spriteTileListView.OwnerDraw = true;
+      spriteTileListView.Size = new System.Drawing.Size(522, 856);
+      spriteTileListView.TabIndex = 0;
+      spriteTileListView.UseCompatibleStateImageBehavior = false;
+      spriteTileListView.View = View.Details;
       // 
       // tableLayoutPanel2
       // 
@@ -146,7 +174,7 @@
       tableLayoutPanel2.RowCount = 2;
       tableLayoutPanel2.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
       tableLayoutPanel2.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
-      tableLayoutPanel2.Size = new System.Drawing.Size(433, 153);
+      tableLayoutPanel2.Size = new System.Drawing.Size(536, 153);
       tableLayoutPanel2.TabIndex = 0;
       // 
       // materialLabel1
@@ -159,10 +187,19 @@
       materialLabel1.Location = new System.Drawing.Point(3, 0);
       materialLabel1.MouseState = ReaLTaiizor.Helper.MaterialDrawHelper.MaterialMouseState.HOVER;
       materialLabel1.Name = "materialLabel1";
-      materialLabel1.Size = new System.Drawing.Size(427, 76);
+      materialLabel1.Size = new System.Drawing.Size(530, 76);
       materialLabel1.TabIndex = 2;
       materialLabel1.Text = "Clut Selector";
       materialLabel1.TextAlign = ContentAlignment.MiddleCenter;
+      // 
+      // clutPalettePanel
+      // 
+      clutPalettePanel.Dock = DockStyle.Fill;
+      clutPalettePanel.Location = new System.Drawing.Point(545, 3);
+      clutPalettePanel.Name = "clutPalettePanel";
+      tableLayoutPanel1.SetRowSpan(clutPalettePanel, 2);
+      clutPalettePanel.Size = new System.Drawing.Size(262, 1059);
+      clutPalettePanel.TabIndex = 4;
       // 
       // TileEditorForm
       // 
@@ -175,6 +212,7 @@
       tableLayoutPanel1.ResumeLayout(false);
       screenTileTabControl.ResumeLayout(false);
       screenTileTab.ResumeLayout(false);
+      spriteTileTab.ResumeLayout(false);
       tableLayoutPanel2.ResumeLayout(false);
       tableLayoutPanel2.PerformLayout();
       ResumeLayout(false);
@@ -190,5 +228,8 @@
     private ReaLTaiizor.Controls.MaterialTabControl screenTileTabControl;
     private TabPage screenTileTab;
     private TabPage spriteTileTab;
+    private ReaLTaiizor.Controls.MaterialListView spriteTileListView;
+    private FolderBrowserDialog folderBrowserDialog1;
+    private Panel clutPalettePanel;
   }
 }
