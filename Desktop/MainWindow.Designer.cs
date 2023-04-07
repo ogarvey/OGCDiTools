@@ -39,6 +39,7 @@ namespace Desktop
       imgToolsBtn = new ReaLTaiizor.Controls.SpaceButton();
       exitBtn = new ReaLTaiizor.Controls.SpaceButton();
       dataToolsBtn = new ReaLTaiizor.Controls.SpaceButton();
+      audioToolsBtn = new ReaLTaiizor.Controls.SpaceButton();
       spaceForm1.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
       splitContainer1.Panel1.SuspendLayout();
@@ -106,6 +107,7 @@ namespace Desktop
       tableLayoutPanel1.Controls.Add(imgToolsBtn, 0, 1);
       tableLayoutPanel1.Controls.Add(exitBtn, 0, 3);
       tableLayoutPanel1.Controls.Add(dataToolsBtn, 0, 0);
+      tableLayoutPanel1.Controls.Add(audioToolsBtn, 0, 2);
       tableLayoutPanel1.Dock = DockStyle.Fill;
       tableLayoutPanel1.Location = new Point(0, 0);
       tableLayoutPanel1.Name = "tableLayoutPanel1";
@@ -114,6 +116,7 @@ namespace Desktop
       tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 33.33445F));
       tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 33.33112F));
       tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 100F));
+      tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
       tableLayoutPanel1.Size = new Size(413, 1255);
       tableLayoutPanel1.TabIndex = 0;
       // 
@@ -166,6 +169,23 @@ namespace Desktop
       dataToolsBtn.Transparent = false;
       dataToolsBtn.Click += spaceButton1_Click;
       // 
+      // audioToolsBtn
+      // 
+      audioToolsBtn.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+      audioToolsBtn.Customization = "Kioq/zIyMv8yMjL/Kioq/y8vL/8nJyf//v7+/yMjI/8qKir/";
+      audioToolsBtn.Font = new Font("Verdana", 8F, FontStyle.Regular, GraphicsUnit.Point);
+      audioToolsBtn.Image = null;
+      audioToolsBtn.Location = new Point(50, 945);
+      audioToolsBtn.Margin = new Padding(50, 175, 50, 175);
+      audioToolsBtn.Name = "audioToolsBtn";
+      audioToolsBtn.NoRounding = false;
+      audioToolsBtn.Size = new Size(313, 34);
+      audioToolsBtn.TabIndex = 3;
+      audioToolsBtn.Text = "Audio Tools";
+      audioToolsBtn.TextAlignment = HorizontalAlignment.Center;
+      audioToolsBtn.Transparent = false;
+      audioToolsBtn.Click += audioToolsBtn_Click;
+      // 
       // MainWindow
       // 
       AutoScaleDimensions = new SizeF(8F, 20F);
@@ -199,5 +219,6 @@ namespace Desktop
     private ReaLTaiizor.Controls.SpaceButton dataToolsBtn;
     private ReaLTaiizor.Controls.SpaceButton imgToolsBtn;
     private ReaLTaiizor.Controls.SpaceButton exitBtn;
+    private ReaLTaiizor.Controls.SpaceButton audioToolsBtn;
   }
 }

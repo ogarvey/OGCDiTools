@@ -12,6 +12,7 @@ namespace Desktop.Views.Data
 {
   public partial class MainDataForm : Form
   {
+    private RTFForm rtfForm;
     public MainDataForm()
     {
       InitializeComponent();
@@ -19,11 +20,23 @@ namespace Desktop.Views.Data
 
     private void loadRTFBtn_Click(object sender, EventArgs e)
     {
-      var form = new RTFForm();
-      form.TopLevel = false;
-      splitContainer1.Panel2.Controls.Add(form);
-      form.Dock = DockStyle.Fill;
-      form.Show();
+      if (rtfForm != null)
+      {
+        rtfForm.Close();
+        loadRTF();
+      } else
+      {
+        loadRTF();
+      }
+    }
+
+    private void loadRTF()
+    {
+      rtfForm = new RTFForm();
+      rtfForm.TopLevel = false;
+      splitContainer1.Panel2.Controls.Add(rtfForm);
+      rtfForm.Dock = DockStyle.Fill;
+      rtfForm.Show();
     }
   }
 }

@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Views\Audio\" />
+    <Folder Include="docs\" />
   </ItemGroup>
 
 </Project>

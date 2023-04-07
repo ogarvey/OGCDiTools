@@ -31,11 +31,14 @@ namespace Desktop.Views
       if (openFileDialog1.ShowDialog() == DialogResult.OK)
       {
         this.Text = filename = openFileDialog1.FileName;
+        spaceForm1.Text = $"RTF Tools - {filename}";
         try
         {
           fileData = File.ReadAllBytes(filename);
           fileSectors = CdiFileHelper.ProcessRTFFileDataSectors(fileData, filename);
           CdiFileHelper.ProcessRTFFileStereoAudioSectors(fileData, filename);
+          CdiFileHelper.ProcessRTFFileMonoAudioSectors(fileData, filename);
+          CdiFileHelper.ProcessRTFFileVideoSectors(fileData, filename);
           UpdateStats();
         }
         catch (Exception)
@@ -89,9 +92,15 @@ namespace Desktop.Views
       var totalSectors = fileSectors?.Count;
       var totalRecords = fileSectors?.Where((fs) => fs.IsEOR).Count();
       var videoSectorCount = fileSectors?.Where((fs) => fs.IsVideo).Count();
-      var monoAudioSectorCount = fileSectors?.Where((fs) => fs.IsAudio).Count();
-      var stereoAudioSectorCount = fileSectors?.Where((fs) => fs.IsAudio).Count();
+      var monoAudioSectorCount = fileSectors?.Where((fs) => fs.IsAudio && fs.IsMono).Count();
+      var stereoAudioSectorCount = fileSectors?.Where((fs) => fs.IsAudio && !fs.IsMono).Count();
       var dataSectorCount = fileSectors?.Where((fs) => fs.IsData).Count();
+      totalSectorsLabel.Text = totalSectors?.ToString("N0");
+      totalRecordsLabel.Text = totalRecords?.ToString("N0");
+      totalVideoLabel.Text = videoSectorCount?.ToString("N0");
+      totalMonoLabel.Text = monoAudioSectorCount?.ToString("N0");
+      totalStereoLabel.Text = stereoAudioSectorCount?.ToString("N0");
+      totalDataLabel.Text = dataSectorCount?.ToString("N0");
     }
 
     private void PopulateBinFiles()

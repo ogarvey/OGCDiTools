@@ -213,7 +213,7 @@ namespace Desktop.Helpers
         if (sectorInfo.IsEmptySector)
           continue;
 
-        if (!sectorInfo.IsVideo || !sectorInfo.IsData)
+        if (!sectorInfo.IsVideo)
           continue;
         // remove first 16 bytes and last 4 bytes of chunk
         chunk = chunk.Skip(HeaderSize).ToArray();
@@ -223,19 +223,28 @@ namespace Desktop.Helpers
 
         if (sectorInfo.IsEOR || sectorInfo.IsEOF)
         {
-          byte[] recordData = byteArrays.SelectMany(a => a).ToArray();
-          recordArray.Add(recordData);
-          // write record data to file
-          var offsets = $"_{i - ((byteArrays.Count - 1) * ChunkSize)}_{i + ChunkSize}";
-          var recordFileName = Path.GetFileNameWithoutExtension(filename) + $"{offsets}_v_{recordArray.Count}.bin";
-          var recordDir = Path.GetDirectoryName(filename) + "\\records\\" + Path.GetFileNameWithoutExtension(filename);
-          Directory.CreateDirectory(recordDir);
-          var recordFilePath = Path.Combine(recordDir, recordFileName);
-          File.WriteAllBytes(recordFilePath, recordData);
-          byteArrays.Clear();
+          WriteRecords(filename, ChunkSize, byteArrays, recordArray, i);
         }
       }
+      if (byteArrays.Count > 0)
+      {
+        WriteRecords(filename, ChunkSize, byteArrays, recordArray, 1);
+      }
 
+    }
+
+    private static void WriteRecords(string filename, int ChunkSize, List<byte[]> byteArrays, List<byte[]> recordArray, int i)
+    {
+      byte[] recordData = byteArrays.SelectMany(a => a).ToArray();
+      recordArray.Add(recordData);
+      // write record data to file
+      var offsets = $"_{i - ((byteArrays.Count - 1) * ChunkSize)}_{i + ChunkSize}";
+      var recordFileName = Path.GetFileNameWithoutExtension(filename) + $"{offsets}_v_{recordArray.Count}.bin";
+      var recordDir = Path.GetDirectoryName(filename) + "\\records\\video\\" + Path.GetFileNameWithoutExtension(filename);
+      Directory.CreateDirectory(recordDir);
+      var recordFilePath = Path.Combine(recordDir, recordFileName);
+      File.WriteAllBytes(recordFilePath, recordData);
+      byteArrays.Clear();
     }
 
     private static List<byte[]> FindClutColorTable(byte[] data)
