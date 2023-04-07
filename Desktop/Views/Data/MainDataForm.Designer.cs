@@ -32,7 +32,7 @@
       splitContainer1 = new SplitContainer();
       tableLayoutPanel1 = new TableLayoutPanel();
       loadRTFBtn = new ReaLTaiizor.Controls.SpaceButton();
-      spaceButton2 = new ReaLTaiizor.Controls.SpaceButton();
+      loadBinBtn = new ReaLTaiizor.Controls.SpaceButton();
       spaceButton3 = new ReaLTaiizor.Controls.SpaceButton();
       mainDataNightForm.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
@@ -86,7 +86,7 @@
       tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.3333321F));
       tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.3333321F));
       tableLayoutPanel1.Controls.Add(loadRTFBtn, 0, 0);
-      tableLayoutPanel1.Controls.Add(spaceButton2, 1, 0);
+      tableLayoutPanel1.Controls.Add(loadBinBtn, 1, 0);
       tableLayoutPanel1.Controls.Add(spaceButton3, 2, 0);
       tableLayoutPanel1.Dock = DockStyle.Fill;
       tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
@@ -112,20 +112,21 @@
       loadRTFBtn.Transparent = false;
       loadRTFBtn.Click += loadRTFBtn_Click;
       // 
-      // spaceButton2
+      // loadBinBtn
       // 
-      spaceButton2.Customization = "Kioq/zIyMv8yMjL/Kioq/y8vL/8nJyf//v7+/yMjI/8qKir/";
-      spaceButton2.Dock = DockStyle.Fill;
-      spaceButton2.Font = new Font("Verdana", 8F, FontStyle.Regular, GraphicsUnit.Point);
-      spaceButton2.Image = null;
-      spaceButton2.Location = new System.Drawing.Point(535, 3);
-      spaceButton2.Name = "spaceButton2";
-      spaceButton2.NoRounding = false;
-      spaceButton2.Size = new System.Drawing.Size(526, 69);
-      spaceButton2.TabIndex = 1;
-      spaceButton2.Text = "Load BIN File";
-      spaceButton2.TextAlignment = HorizontalAlignment.Center;
-      spaceButton2.Transparent = false;
+      loadBinBtn.Customization = "Kioq/zIyMv8yMjL/Kioq/y8vL/8nJyf//v7+/yMjI/8qKir/";
+      loadBinBtn.Dock = DockStyle.Fill;
+      loadBinBtn.Font = new Font("Verdana", 8F, FontStyle.Regular, GraphicsUnit.Point);
+      loadBinBtn.Image = null;
+      loadBinBtn.Location = new System.Drawing.Point(535, 3);
+      loadBinBtn.Name = "loadBinBtn";
+      loadBinBtn.NoRounding = false;
+      loadBinBtn.Size = new System.Drawing.Size(526, 69);
+      loadBinBtn.TabIndex = 1;
+      loadBinBtn.Text = "Load BIN File";
+      loadBinBtn.TextAlignment = HorizontalAlignment.Center;
+      loadBinBtn.Transparent = false;
+      loadBinBtn.Click += loadBinForm_Click;
       // 
       // spaceButton3
       // 
@@ -169,7 +170,7 @@
     private SplitContainer splitContainer1;
     private TableLayoutPanel tableLayoutPanel1;
     private ReaLTaiizor.Controls.SpaceButton loadRTFBtn;
-    private ReaLTaiizor.Controls.SpaceButton spaceButton2;
+    private ReaLTaiizor.Controls.SpaceButton loadBinBtn;
     private ReaLTaiizor.Controls.SpaceButton spaceButton3;
   }
 }

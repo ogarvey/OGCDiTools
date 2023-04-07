@@ -41,8 +41,8 @@ namespace Desktop.Views
     public BINForm()
     {
       InitializeComponent();
-      populateTileList.Enabled = false;
-      loadMapBtn.Enabled = false;
+      //populateTileList.Enabled = false;
+      //loadMapBtn.Enabled = false;
       dungeonTrackBar1.Enabled = false;
     }
 
@@ -86,7 +86,7 @@ namespace Desktop.Views
             isPaletteLoaded = true;
             if (isBinLoaded)
             {
-              populateTileList.Enabled = true;
+              //populateTileList.Enabled = true;
             }
           }
         }
@@ -119,8 +119,8 @@ namespace Desktop.Views
             isBinLoaded = true;
             if (isPaletteLoaded)
             {
-              populateTileList.Enabled = true;
-              loadMapBtn.Enabled = true;
+              //populateTileList.Enabled = true;
+              //loadMapBtn.Enabled = true;
             }
           }
 
@@ -210,7 +210,7 @@ namespace Desktop.Views
         item.Text = $"Tile {index}";
         potentialTileListView.Items.Add(item);
       }
-      tileEditorBtn.Enabled = true;
+      // tileEditorBtn.Enabled = true;
     }
 
     public void LoadBinFolder()
