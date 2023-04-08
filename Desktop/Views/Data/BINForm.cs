@@ -212,14 +212,7 @@ namespace Desktop.Views
       }
       // tileEditorBtn.Enabled = true;
     }
-
-    public void LoadBinFolder()
-    {
-      if (folderBrowserDialog1.ShowDialog() == DialogResult.OK)
-      {
-
-      }
-    }
+    
 
     private void button1_Click(object sender, EventArgs e)
     {
@@ -428,92 +421,5 @@ namespace Desktop.Views
       }
     }
 
-    static void ProcessAudioData(byte[] data, List<short> left, List<short> right)
-    {
-      // Call DecodeAudioSector here with the data parameter, left, and right
-      // ...
-      DecodeAudioSector(data, left, right, false, true);
-    }
-
-    private void previewAudioBtn_Click(object sender, EventArgs e)
-    {
-      List<short> left = new List<short>();
-      List<short> right = new List<short>();
-
-      for (int i = 0; i < binFileData.Length; i += 2304)
-      {
-        byte[] chunk = new byte[2304];
-        Array.Copy(binFileData, i, chunk, 0, 2304);
-        ProcessAudioData(chunk, left, right);
-      }
-
-      WAVHeader header = new WAVHeader
-      {
-        ChannelNumber = 2, // Mono
-        Frequency = 37800, // 18.9 kHz
-      };
-
-      PreviewWAV(header, left, right);
-    }
-
-    private WaveOut waveOut;
-    private WaveFileReader waveFileReader;
-
-    private void PreviewWAV(WAVHeader header, List<short> left, List<short> right)
-    {
-      if (waveOut != null && waveOut.PlaybackState == PlaybackState.Playing)
-      {
-        waveOut.Pause();
-        dungeonTrackBar1.Enabled = false;
-        return;
-      }
-      else if (waveOut != null && waveOut.PlaybackState == PlaybackState.Paused)
-      {
-        waveOut.Play();
-        dungeonTrackBar1.Enabled = true;
-        return;
-      }
-
-      memoryStream = new MemoryStream();
-      AudioHelper.WriteWAV(memoryStream, header, left, right);
-
-      memoryStream.Position = 0;
-      waveFileReader = new WaveFileReader(memoryStream);
-
-      waveOut = new WaveOut();
-      waveOut.Init(waveFileReader);
-      dungeonTrackBar1.Maximum = (int)waveFileReader.TotalTime.TotalSeconds;
-      waveOut.Play();
-      dungeonTrackBar1.Value = (int)waveFileReader.CurrentTime.TotalSeconds;
-      dungeonTrackBar1.Enabled = true;
-
-    }
-
-    private void stopAudioBtn_Click(object sender, EventArgs e)
-    {
-      if (waveOut != null && waveOut.PlaybackState == PlaybackState.Playing)
-      {
-        waveOut.Stop();
-        dungeonTrackBar1.Enabled = false;
-      }
-    }
-
-    private void dungeonTrackBar1_ValueChanged()
-    {
-      if (waveFileReader != null)
-      {
-        // Seek the audio file to the new position based on the TrackBar value
-        waveFileReader.CurrentTime = TimeSpan.FromSeconds(dungeonTrackBar1.Value);
-      }
-    }
-
-    private void timer_Tick(object sender, EventArgs e)
-    {
-      if (waveFileReader != null && waveOut.PlaybackState == PlaybackState.Playing)
-      {
-        // Update the TrackBar value based on the current position of the playing audio
-        dungeonTrackBar1.Value = (int)waveFileReader.CurrentTime.TotalSeconds;
-      }
-    }
   }
 }

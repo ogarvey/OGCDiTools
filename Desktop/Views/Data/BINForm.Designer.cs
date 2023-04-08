@@ -117,12 +117,10 @@ namespace Desktop.Views
       dungeonTrackBar1.Value = 0;
       dungeonTrackBar1.ValueDivison = ReaLTaiizor.Controls.DungeonTrackBar.ValueDivisor.By1;
       dungeonTrackBar1.ValueToSet = 0F;
-      dungeonTrackBar1.ValueChanged += dungeonTrackBar1_ValueChanged;
       // 
       // timer1
       // 
       timer1.Enabled = true;
-      timer1.Tick += timer_Tick;
       // 
       // BINForm
       // 
