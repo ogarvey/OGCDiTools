@@ -84,4 +84,12 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: Dotnet Published Release
+        path: ./publish
+        
+    - name: Download a Build Artifact
+      uses: actions/download-artifact@v2.1.1
+      with:
+        # Artifact name
+        name: Release
+        # Destination path
         path: ./release
