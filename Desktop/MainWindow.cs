@@ -1,6 +1,7 @@
 using Desktop.Views;
 using Desktop.Views.Audio;
 using Desktop.Views.Data;
+using Desktop.Views.Imagery;
 
 namespace Desktop
 {
@@ -8,17 +9,12 @@ namespace Desktop
   {
     private MainDataForm mainDataForm;
     private AudioPlayerForm audioToolsForm;
+    private ImageToolsForm imageToolsForm;
     public MainWindow()
     {
       InitializeComponent();
       this.Size = Screen.PrimaryScreen.WorkingArea.Size;
       this.Location = Screen.PrimaryScreen.WorkingArea.Location;
-    }
-
-    private void button2_Click(object sender, EventArgs e)
-    {
-      BINForm bin = new BINForm();
-      bin.Show();
     }
 
     private void spaceButton1_Click(object sender, EventArgs e)
@@ -34,6 +30,9 @@ namespace Desktop
 
       if (audioToolsForm != null)
         audioToolsForm.Close();
+
+      if (imageToolsForm != null)
+        imageToolsForm.Close();
     }
 
     private void loadMainDataForm()
@@ -43,11 +42,6 @@ namespace Desktop
       splitContainer1.Panel2.Controls.Add(mainDataForm);
       mainDataForm.Dock = DockStyle.Fill;
       mainDataForm.Show();
-    }
-
-    private void exitBtn_Click(object sender, EventArgs e)
-    {
-      this.Close();
     }
 
     private void audioToolsBtn_Click(object sender, EventArgs e)
@@ -63,6 +57,26 @@ namespace Desktop
       splitContainer1.Panel2.Controls.Add(audioToolsForm);
       audioToolsForm.Dock = DockStyle.Fill;
       audioToolsForm.Show();
+    }
+
+    private void imageToolsBtn_Click(object sender, EventArgs e)
+    {
+      CheckOpenForms();
+      loadImageForm();
+    }
+
+    private void loadImageForm()
+    {
+      imageToolsForm = new ImageToolsForm();
+      imageToolsForm.TopLevel = false;
+      splitContainer1.Panel2.Controls.Add(imageToolsForm);
+      imageToolsForm.Dock = DockStyle.Fill;
+      imageToolsForm.Show();
+    }
+
+    private void exitBtn_Click(object sender, EventArgs e)
+    {
+      this.Close();
     }
   }
 }

@@ -25,6 +25,11 @@ namespace Desktop.Views.Audio
     public AudioPlayerForm()
     {
       InitializeComponent();
+      if (waveOut != null && waveOut.PlaybackState == PlaybackState.Playing)
+      {
+        waveOut.Stop();
+        trackBar1.Enabled = false;
+      }
     }
 
     private void loadAudioFileBtn_Click(object sender, EventArgs e)

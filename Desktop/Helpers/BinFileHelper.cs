@@ -34,6 +34,27 @@ namespace Desktop.Helpers
       return matchingFiles;
 
     }
+
+    public static bool IsMainDataFile(string path)
+    {
+      string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(path);
+      if (fileNameWithoutExtension.Length > 0)
+      {
+        int lastUnderscoreIndex = fileNameWithoutExtension.LastIndexOf('_');
+        if (lastUnderscoreIndex != -1 && lastUnderscoreIndex < fileNameWithoutExtension.Length - 1)
+        {
+          string numericPart = fileNameWithoutExtension.Substring(lastUnderscoreIndex + 1);
+          if (Int32.TryParse(numericPart, out int lastDigits) && lastDigits == 5)
+          {
+            return true;
+          }
+        }
+
+
+      }
+      return false;
+
+    }
     public static byte[] ReadMapBytes(byte[] bytes)
     {
       // return first 1600 bytes
@@ -49,7 +70,7 @@ namespace Desktop.Helpers
       List<byte[]> byteArrayList = new List<byte[]>();
 
       int offset = 0;
-      while (offset < 0x10000 )
+      while (offset < 0x10000)
       {
         for (int i = 0; i < NumChunks; i++)
         {

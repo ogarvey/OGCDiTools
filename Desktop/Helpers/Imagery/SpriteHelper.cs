@@ -3,89 +3,148 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Color = System.Drawing.Color;
 
 namespace Desktop.Helpers.Imagery
 {
-  internal class SpriteHelper
+  public static class SpriteHelper
   {
-
-    void ProcessSprite(int spriteIndex, int xPos, int yPos)
+    public static List<byte[]> GetSpriteBlobs(byte[] spriteBytes)
     {
-      int sourcePtrIndex;
-      int destPtrIndex;
-      int currentSpritePtrIndex;
-      List<byte> spriteData = new List<byte>();
-      List<byte> spriteOffsetTable = new List<byte>();
-      List<byte> yPosOffsetTable = new List<byte>();
-      List<byte> baseOffset = new List<byte>();
-      List<byte> xPosLowerBoundTable= new List<byte>();
-      List<byte> yPosUpperBoundTable= new List<byte>();
-      List<byte> yPosLowerBoundTable = new List<byte>();
-      // Replace A6 with the actual base addresses of the arrays or structures
-      // ...
+      List<byte[]> blobs = new List<byte[]>();
+      int startPosition = 0;
 
-      if (xPos > 2 && xPos < 0x25 && yPos > 4)
+      for (int i = 0; i < spriteBytes.Length - 1; i++)
       {
-        // Replace array accesses and pointer arithmetic with appropriate C# code
-        // ...
-        sourcePtrIndex = spriteOffsetTable[spriteIndex * 4];
-        int calculatedOffset = yPosOffsetTable[yPos * 4] + xPos * 8 - 0x3218;
-        destPtrIndex = calculatedOffset + baseOffset[0];
-        currentSpritePtrIndex = sourcePtrIndex;
-
-        for (int outerLoopCounter = 0; outerLoopCounter < 0x2f; outerLoopCounter++)
+        // check for sprite boundary
+        if (spriteBytes[i] == 0x00 && spriteBytes[i + 1] == 0x38)
         {
-          for (int innerLoopCounter = 0; innerLoopCounter < 0x37; innerLoopCounter++)
+          if (startPosition < i)
           {
-            // Replace pointer dereferences and pointer arithmetic with appropriate C# code
-            // ...
-
-            // Loop body is essentially the same as the original code, with adjustments for C# syntax
-          }
-        }
-      }
-      else
-      {
-
-        // Replace array accesses and pointer arithmetic with appropriate C# code
-        // ...
-        sourcePtrIndex = spriteOffsetTable[spriteIndex * 4];
-        int calculatedOffset = yPosOffsetTable[yPos * 4] + xPos * 8 - 0x3218;
-        destPtrIndex = calculatedOffset + baseOffset[0];
-        currentSpritePtrIndex = sourcePtrIndex;
-        char cVar5 = '\0';
-        for (int outerLoopCounter = 0; outerLoopCounter < 0x2f; outerLoopCounter++)
-        {
-          int iVar4 = 0;
-          for (int innerLoopCounter = 0; innerLoopCounter < 0x37; innerLoopCounter++)
-          {
-            // Replace pointer dereferences and pointer arithmetic with appropriate C# code
-            // ...
-
-            //if (/* condition from the original code */)
-            //{
-            //  // Perform operations based on the original code
-            //  iVar4 += /* value from the original code */;
-            //}
-            //else
-            //{
-            //  // Perform operations based on the original code, using C# syntax
-
-            //  if (/* condition from the original code */)
-            //  {
-            //    // Perform operations based on the original code, using C# syntax
-            //  }
-            //}
-
-            // Increment iVar4 based on the conditions in the original code
-            iVar4++;
+            int blobLength = i - startPosition;
+            byte[] blob = new byte[blobLength];
+            Array.Copy(spriteBytes, startPosition, blob, 0, blobLength);
+            blobs.Add(blob);
           }
 
-          // Increment cVar5
-          cVar5++;
+          startPosition = i + 2;
+          i++; // Skip the next byte as it is already checked
         }
       }
+
+      // Add the last blob if it exists
+      if (startPosition < spriteBytes.Length)
+      {
+        int blobLength = spriteBytes.Length - startPosition;
+        byte[] blob = new byte[blobLength];
+        Array.Copy(spriteBytes, startPosition, blob, 0, blobLength);
+        blobs.Add(blob);
+      }
+
+      return blobs;
     }
+    public class ImageLine
+    {
+      public int LeftOffset { get; set; }
+      public List<byte> Pixels { get; set; }
+      public int RemainingPixels { get; set; }
+    }
+    public static List<ImageLine> DecodeImage(byte[] data)
+    {
+      List<ImageLine> imageLines = new List<ImageLine>();
+      int i = 0;
 
-  }
+      while (i < data.Length)
+      {
+        if (data[i] == 0x00)
+        {
+          ImageLine line = new ImageLine();
+          line.LeftOffset = data[i + 1];
+          line.Pixels = new List<byte>();
+          i += 2;
+
+          while (i < data.Length)
+          {
+            if (data[i] == 0x00)
+            {
+              if (i + 2 < data.Length && data[i + 2] == 0x00)
+              {
+                line.RemainingPixels = data[i + 1];
+                i += 2;
+                break;
+              }
+              else
+              {
+                int numberOfNullBytes = data[i + 1];
+                for (int j = 0; j < numberOfNullBytes; j++)
+                {
+                  line.Pixels.Add(0x00);
+                }
+                i += 2;
+              }
+            }
+            else
+            {
+              line.Pixels.Add(data[i]);
+              i++;
+            }
+
+            if (i >= data.Length || imageLines.Count > 0 && (line.Pixels.Count == imageLines[0].RemainingPixels + imageLines[0].LeftOffset + imageLines[0].Pixels.Count))
+            {
+              imageLines.Add(line);
+              break;
+            }
+          }
+
+          imageLines.Add(line);
+        } else
+        {
+          i++;
+        }
+      }
+
+      return imageLines;
+    }
+    
+    public static Bitmap CreateBitmapFromImageLines(List<ImageLine> imageLines, List<Color> colorPalette)
+    {
+      var height = imageLines.Count;
+      int width = imageLines.Max(x => x.LeftOffset + x.Pixels.Count + x.RemainingPixels);
+      Bitmap bitmap = new Bitmap(width, height);
+      int currentLine = 0;
+
+      using (Graphics g = Graphics.FromImage(bitmap))
+      {
+        g.Clear(Color.Transparent);
+      }
+
+      foreach (ImageLine line in imageLines)
+      {
+        int x = line.LeftOffset;
+
+        for (int i = 0; i < line.Pixels.Count; i++)
+        {
+          byte currentByte = line.Pixels[i];
+
+          // transparent where bytes are null bytes
+          if (currentByte == 0x00)
+          {
+            bitmap.SetPixel(x, currentLine, Color.Transparent);
+          }
+          else if ((currentByte & 0xF0) == 0xC0)
+          {
+            byte colorIndex = (byte)(currentByte & 0x0F);
+            Color color = colorPalette[colorIndex];
+            bitmap.SetPixel(x, currentLine, color);
+          }
+
+          x++;
+        }
+
+        currentLine++;
+      }
+
+      return bitmap;
+    }
+    }
 }
