@@ -69,7 +69,7 @@ namespace Desktop.Views.Imagery
             var blobs = GetSpriteBlobs(binFileData.Skip(67848).Take(56574).ToArray());
             foreach (var (item,index) in blobs.WithIndex())
             {
-              var outputDir = Path.GetDirectoryName(filename) + "\\output";
+              var outputDir = Path.GetDirectoryName(filename) + "\\output\\sprites";
               var binOutputDir = Path.GetDirectoryName(filename) + "\\output\\bins";
               Directory.CreateDirectory(outputDir);
               Directory.CreateDirectory(binOutputDir);
@@ -78,8 +78,48 @@ namespace Desktop.Views.Imagery
               var imageLines = DecodeImage(item);
               imagesAsLines.Add(imageLines);
               var bitmap = CreateBitmapFromImageLines(imageLines, colors);
-              bitmap.Save(Path.Combine(outputDir, Path.GetFileNameWithoutExtension(filename) + $"_{index}.png"));
+              if (bitmap != null)
+              {
+                var bitmapScaled = BitmapHelper.Scale4(bitmap);
+                bitmap.Save(Path.Combine(outputDir, Path.GetFileNameWithoutExtension(filename) + $"_{index}.png"));
+                bitmapScaled.Save(Path.Combine(outputDir, Path.GetFileNameWithoutExtension(filename) + $"_{index}_upscaled.png"));
+              }
             }
+            isBinLoaded = true;
+            parseDyuvBtn.Enabled = true;
+            screenImageBtn.Enabled = true;
+          } else if (binFileData.Length >= 100352)
+          {
+            ExtractPalette();
+            List<List<ImageLine>> imagesAsLines = new List<List<ImageLine>>();
+            List<Bitmap> bitmaps = new List<Bitmap>();
+            var blobs = GetSpriteBlobs(binFileData.Skip(98400).ToArray());
+            foreach (var (item, index) in blobs.WithIndex())
+            {
+              var outputDir = Path.GetDirectoryName(filename) + "\\output";
+              var binOutputDir = Path.GetDirectoryName(filename) + "\\output\\bins";
+              Directory.CreateDirectory(outputDir);
+              Directory.CreateDirectory(binOutputDir);
+              var spriteBinFile = Path.Combine(binOutputDir, Path.GetFileNameWithoutExtension(filename) + $"_{index}.bin");
+              File.WriteAllBytes(spriteBinFile, item);
+              var imageLines = DecodeImage(item);
+              imagesAsLines.Add(imageLines);
+              if (imageLines.Count > 5 && imageLines.Count < 150)
+              {
+                var bitmap = CreateBitmapFromImageLines(imageLines, colors);
+                if (bitmap != null)
+                {
+                  var bitmapScaled = BitmapHelper.Scale4(bitmap);
+                  bitmap.Save(Path.Combine(outputDir, Path.GetFileNameWithoutExtension(filename) + $"_{index}.png"));
+                  bitmapScaled.Save(Path.Combine(outputDir, Path.GetFileNameWithoutExtension(filename) + $"_{index}_upscaled.png"));
+                }
+              }
+            }
+            isBinLoaded = true;
+            parseDyuvBtn.Enabled = true;
+            screenImageBtn.Enabled = true;
+          } else
+          {
             isBinLoaded = true;
             parseDyuvBtn.Enabled = true;
             screenImageBtn.Enabled = true;
@@ -110,7 +150,7 @@ namespace Desktop.Views.Imagery
 
     private void loadDyuvForm()
     {
-      dyuvForm = new DYUVForm(binFileData);
+      dyuvForm = new DYUVForm(binFileData, filename);
       dyuvForm.TopLevel = false;
       splitContainer1.Panel2.Controls.Add(dyuvForm);
       dyuvForm.Dock = DockStyle.Fill;
@@ -130,6 +170,34 @@ namespace Desktop.Views.Imagery
       splitContainer1.Panel2.Controls.Add(tilePlaygroundForm);
       tilePlaygroundForm.Dock = DockStyle.Fill;
       tilePlaygroundForm.Show();
+    }
+    
+    private void ExtractPalette()
+    {
+      var palette = binFileData.Skip(98336).Take(64).ToArray();
+      if (palette.Length > 0)
+      {
+        var length = (int)palette.Length;
+        colors = new List<Color>();
+        var count = 1;
+        for (int i = 0; i < length; i += 4)
+        {
+          var r = palette[i + 1];
+          var g = palette[i + 2];
+          var b = palette[i + 3];
+          var color = Color.FromArgb(255, r, g, b);
+          colors.Add(color);
+          count++;
+        }
+        if (colors.Count < 16)
+        {
+          var remaining = 16 - colors.Count;
+          for (int i = 0; i < remaining; i++)
+          {
+            colors.Add(Color.FromArgb(255, 0, 0, 0));
+          }
+        }
+      }
     }
   }
 }

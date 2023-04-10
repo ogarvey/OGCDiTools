@@ -54,7 +54,7 @@ namespace Desktop.Helpers.Imagery
       List<ImageLine> imageLines = new List<ImageLine>();
       int i = 0;
 
-      while (i < data.Length)
+      while (i < data.Length - 1)
       {
         if (data[i] == 0x00)
         {
@@ -63,7 +63,7 @@ namespace Desktop.Helpers.Imagery
           line.Pixels = new List<byte>();
           i += 2;
 
-          while (i < data.Length)
+          while (i < data.Length - 1)
           {
             if (data[i] == 0x00)
             {
@@ -89,7 +89,7 @@ namespace Desktop.Helpers.Imagery
               i++;
             }
 
-            if (i >= data.Length || imageLines.Count > 0 && (line.Pixels.Count == imageLines[0].RemainingPixels + imageLines[0].LeftOffset + imageLines[0].Pixels.Count))
+            if (i >= data.Length - 1 || imageLines.Count > 0 && (line.Pixels.Count == imageLines[0].RemainingPixels + imageLines[0].LeftOffset + imageLines[0].Pixels.Count))
             {
               imageLines.Add(line);
               break;
@@ -97,7 +97,8 @@ namespace Desktop.Helpers.Imagery
           }
 
           imageLines.Add(line);
-        } else
+        }
+        else
         {
           i++;
         }
@@ -105,46 +106,54 @@ namespace Desktop.Helpers.Imagery
 
       return imageLines;
     }
-    
+
     public static Bitmap CreateBitmapFromImageLines(List<ImageLine> imageLines, List<Color> colorPalette)
     {
-      var height = imageLines.Count;
-      int width = imageLines.Max(x => x.LeftOffset + x.Pixels.Count + x.RemainingPixels);
-      Bitmap bitmap = new Bitmap(width, height);
-      int currentLine = 0;
-
-      using (Graphics g = Graphics.FromImage(bitmap))
+      try
       {
-        g.Clear(Color.Transparent);
-      }
+        var height = imageLines.Count;
+        int width = imageLines.Max(x => x.LeftOffset + x.Pixels.Count + x.RemainingPixels);
+        Bitmap bitmap = new Bitmap(width, height);
+        int currentLine = 0;
 
-      foreach (ImageLine line in imageLines)
-      {
-        int x = line.LeftOffset;
-
-        for (int i = 0; i < line.Pixels.Count; i++)
+        using (Graphics g = Graphics.FromImage(bitmap))
         {
-          byte currentByte = line.Pixels[i];
-
-          // transparent where bytes are null bytes
-          if (currentByte == 0x00)
-          {
-            bitmap.SetPixel(x, currentLine, Color.Transparent);
-          }
-          else if ((currentByte & 0xF0) == 0xC0)
-          {
-            byte colorIndex = (byte)(currentByte & 0x0F);
-            Color color = colorPalette[colorIndex];
-            bitmap.SetPixel(x, currentLine, color);
-          }
-
-          x++;
+          g.Clear(Color.Transparent);
         }
 
-        currentLine++;
-      }
+        foreach (ImageLine line in imageLines)
+        {
+          int x = line.LeftOffset;
 
-      return bitmap;
+          for (int i = 0; i < line.Pixels.Count; i++)
+          {
+            byte currentByte = line.Pixels[i];
+
+            // transparent where bytes are null bytes
+            if (currentByte == 0x00)
+            {
+              bitmap.SetPixel(x, currentLine, Color.Transparent);
+            }
+            else if ((currentByte & 0xF0) == 0xD0)
+            {
+              byte colorIndex = (byte)(currentByte & 0x0F);
+              Color color = colorPalette[colorIndex];
+              bitmap.SetPixel(x, currentLine, color);
+            }
+
+            x++;
+          }
+
+          currentLine++;
+        }
+
+        return bitmap;
+      }
+      catch (Exception)
+      {
+
+        return null;
+      }
     }
-    }
+  }
 }

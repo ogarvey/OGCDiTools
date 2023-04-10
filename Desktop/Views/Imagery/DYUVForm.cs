@@ -18,12 +18,14 @@ namespace Desktop.Views.Imagery
   {
     private byte[] _binFileBytes;
     private byte[] _dyuvBytes;
-    public DYUVForm(byte[] binFile)
+    private string _filename;
+    public DYUVForm(byte[] binFile, string filename)
     {
       InitializeComponent();
       _binFileBytes = binFile;
       _dyuvBytes = GetDyuvBytes();
       DisplayDyuvImage();
+      _filename = filename;
     }
 
     private byte[] GetDyuvBytes()
@@ -110,6 +112,15 @@ namespace Desktop.Views.Imagery
           return (0, 92160);
         }
       }
+    }
+
+    private void exportImageBtn_Click(object sender, EventArgs e)
+    {
+      var outputDir = Path.GetDirectoryName(_filename);
+      var outputFile = Path.GetFileNameWithoutExtension(_filename) + ".png";
+      Directory.CreateDirectory(outputDir + @"/output/DYUV");
+      var output = Path.Combine(outputDir + @"/output/DYUV", outputFile);
+      pictureBox1.Image.Save(output);
     }
   }
 }

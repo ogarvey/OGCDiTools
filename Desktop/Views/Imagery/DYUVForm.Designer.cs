@@ -114,6 +114,7 @@
       exportImageBtn.Text = "Export Image";
       exportImageBtn.TextAlignment = HorizontalAlignment.Center;
       exportImageBtn.Transparent = false;
+      exportImageBtn.Click += exportImageBtn_Click;
       // 
       // changeOffsetBtn
       // 
