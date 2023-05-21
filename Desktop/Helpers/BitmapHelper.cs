@@ -1,9 +1,14 @@
-﻿using System;
+﻿using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Processing;
+using SixLabors.ImageSharp.Formats.Gif;
+using System;
 using System.Collections.Generic;
 using System.Drawing.Imaging;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Color = SixLabors.ImageSharp.Color;
+using Image = SixLabors.ImageSharp.Image;
 using Point = System.Drawing.Point;
 using Rectangle = System.Drawing.Rectangle;
 
@@ -14,6 +19,55 @@ namespace Desktop.Helpers
     const int Ymask = 0x00ff0000;
     const int Umask = 0x0000ff00;
     const int Vmask = 0x000000ff;
+
+    public static bool CreateDyuvGif(List<Bitmap> bitmapImages)
+    {
+      try
+      {
+        // Convert System.Drawing.Bitmap to ImageSharp Image
+        List<Image> images = new List<Image>();
+
+        foreach (var bitmap in bitmapImages)
+        {
+          using var memoryStream = new MemoryStream();
+          bitmap.Save(memoryStream, ImageFormat.Png);
+          memoryStream.Position = 0;
+          Image image = Image.Load(memoryStream);
+          images.Add(image);
+        }
+
+        // Save images as a looping GIF
+        using (var outputStream = new FileStream("output.gif", FileMode.Create))
+        {
+          var gifEncoder = new GifEncoder();
+
+          // Optionally, you can set the frame delay in milliseconds (e.g. 100ms)
+          int frameDelay = 100;
+
+          using (var gif = new Image<Rgba32>(Configuration.Default, images[0].Width, images[0].Height))
+          {
+            foreach (var image in images)
+            {
+              image.Mutate(x => x.BackgroundColor(Color.Transparent));
+              gif.Frames.AddFrame(image.Frames[0]);
+            }
+
+            gif.Save(outputStream, gifEncoder);
+          }
+        }
+
+        // Dispose the ImageSharp images
+        foreach (var image in images)
+        {
+          image.Dispose();
+        }
+      }
+      catch (Exception)
+      {
+        return false;
+      }
+      return true;
+    }
 
     /// <summary>
     /// Compares two ARGB colors according to the provided Y, U, V and A thresholds.

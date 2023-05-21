@@ -1,17 +1,25 @@
+using Desktop.Helpers;
+using Desktop.Helpers.Imagery;
+using Desktop.Interfaces;
 using Desktop.Views;
 using Desktop.Views.Audio;
 using Desktop.Views.Data;
 using Desktop.Views.Imagery;
+using Microsoft.Extensions.DependencyInjection;
+using Color = System.Drawing.Color;
 
 namespace Desktop
 {
   public partial class MainWindow : Form
   {
+    private readonly IServiceProvider _serviceProvider;
     private MainDataForm mainDataForm;
     private AudioPlayerForm audioToolsForm;
     private ImageToolsForm imageToolsForm;
-    public MainWindow()
+
+    public MainWindow(IServiceProvider serviceProvider)
     {
+      _serviceProvider = serviceProvider;
       InitializeComponent();
       this.Size = Screen.PrimaryScreen.WorkingArea.Size;
       this.Location = Screen.PrimaryScreen.WorkingArea.Location;
@@ -37,7 +45,7 @@ namespace Desktop
 
     private void loadMainDataForm()
     {
-      mainDataForm = new MainDataForm();
+      mainDataForm = _serviceProvider.GetRequiredService<MainDataForm>();
       mainDataForm.TopLevel = false;
       splitContainer1.Panel2.Controls.Add(mainDataForm);
       mainDataForm.Dock = DockStyle.Fill;
@@ -78,5 +86,7 @@ namespace Desktop
     {
       this.Close();
     }
+
+
   }
 }

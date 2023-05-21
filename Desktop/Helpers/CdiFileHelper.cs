@@ -51,20 +51,25 @@ namespace Desktop.Helpers
           byte[] recordData = byteArrays.SelectMany(a => a).ToArray();
           recordArray.Add(recordData);
           // write record data to file
-          var offsets = $"_{i - ((byteArrays.Count - 1) * ChunkSize)}_{i + ChunkSize}";
-          var recordFileName = Path.GetFileNameWithoutExtension(filename) + $"{offsets}_d_{recordArray.Count}.bin";
-          var recordDir = Path.GetDirectoryName(filename) + "\\records\\" + Path.GetFileNameWithoutExtension(filename);
+          var isMpeg = recordData[0] == 0x00 && recordData[1] == 0x00 && recordData[2] == 0x01 && recordData[3] == 0xBA;
+          var recordFileName = Path.GetFileNameWithoutExtension(filename) + (isMpeg ? "_v_" : "_d_") + $"{recordArray.Count}.bin";
+          var recordDir = Path.GetDirectoryName(filename) + "\\records\\" + Path.GetFileNameWithoutExtension(filename) + "\\data\\";
           Directory.CreateDirectory(recordDir);
           var recordFilePath = Path.Combine(recordDir, recordFileName);
           File.WriteAllBytes(recordFilePath, recordData);
-          List<byte[]> clut = FindClutColorTable(recordData);
-          if (clut.Count > 0)
-          {
-            var recordClutFileName = Path.GetFileNameWithoutExtension(filename) + $"_{recordArray.Count}.clut";
-            var recordClutPath = Path.Combine(Path.GetDirectoryName(filename) + "\\records\\", recordClutFileName);
-            File.WriteAllBytes(recordClutPath, clut.SelectMany(a => a).ToArray());
-          }
           byteArrays.Clear();
+        }
+        if (sectorInfo.IsEOF && byteArrays.Count > 0)
+        {
+          byte[] recordData = byteArrays.SelectMany(a => a).ToArray();
+          recordArray.Add(recordData);
+          // write record data to file
+          var isMpeg = recordData[0] == 0x00 && recordData[1] == 0x00 && recordData[2] == 0x01 && recordData[3] == 0xBA;
+          var recordFileName = Path.GetFileNameWithoutExtension(filename) + (isMpeg ? "_v_EOF" : "_d_EOF") + $"{recordArray.Count}.bin";
+          var recordDir = Path.GetDirectoryName(filename) + "\\records\\" + Path.GetFileNameWithoutExtension(filename) + "\\data\\";
+          Directory.CreateDirectory(recordDir);
+          var recordFilePath = Path.Combine(recordDir, recordFileName);
+          File.WriteAllBytes(recordFilePath, recordData);
         }
       }
 
@@ -78,7 +83,7 @@ namespace Desktop.Helpers
       const int HeaderSize = 24;
       List<SectorInfo> sectorInfoList = new List<SectorInfo>();
 
-      Dictionary<int, List<byte[]>> byteArrays = new Dictionary<int, List<byte[]>>();
+      Dictionary<string, List<byte[]>> byteArrays = new Dictionary<string, List<byte[]>>();
       List<byte[]> recordArray = new List<byte[]>();
 
       for (int i = 0, j = 1; i < fileData.Length; i += ChunkSize)
@@ -109,22 +114,49 @@ namespace Desktop.Helpers
         var bytesToTake = chunk.Length - 24;
         chunk = chunk.Take(bytesToTake).ToArray();
 
-        if (!byteArrays.ContainsKey(sectorInfo.Channel))
+        var bps = sectorInfo.BitsPerSampleString.Replace(" ", "_");
+        var sampleFreq = sectorInfo.SamplingFrequencyString.Replace(" ", "_");
+        var channel = sectorInfo.Channel;
+        var key = $"{sectorInfo.FileNumber}_{channel}_{bps}_{sampleFreq}";
+
+        if (!byteArrays.ContainsKey(key))
         {
-          byteArrays[sectorInfo.Channel] = new List<byte[]>();
+          byteArrays[key] = new List<byte[]>();
         }
-        byteArrays[sectorInfo.Channel].Add(chunk);
+        byteArrays[key].Add(chunk);
+
+        if (sectorInfo.IsEOR || sectorInfo.IsEOF )
+        {
+
+          foreach (var baKey in byteArrays.Keys)
+          {
+            byte[] recordData = byteArrays[baKey].SelectMany(a => a).ToArray();
+            recordArray.Add(recordData);
+            // write record data to file
+            var isMpeg = recordData[0] == 0x00 && recordData[1] == 0x00 && recordData[2] == 0x01 && recordData[3] == 0xBA;
+            var recordFileName = Path.GetFileNameWithoutExtension(filename) + (isMpeg ? $"_mpeg_a_{recordArray.Count}.bin": $"_stereo_a_{baKey}_{recordArray.Count}.bin");
+            var recordDir = Path.GetDirectoryName(filename) + "\\records\\" + Path.GetFileNameWithoutExtension(filename) + "\\audio_stereo\\";
+            Directory.CreateDirectory(recordDir);
+            var recordFilePath = Path.Combine(recordDir, recordFileName);
+            File.WriteAllBytes(recordFilePath, recordData);
+          }
+          byteArrays.Clear();
+        }
       }
-      foreach (var channel in byteArrays.Keys)
+      if (byteArrays.Count > 0)
       {
-        byte[] recordData = byteArrays[channel].SelectMany(a => a).ToArray();
-        recordArray.Add(recordData);
-        // write record data to file
-        var recordFileName = Path.GetFileNameWithoutExtension(filename) + $"_stereo_a_{recordArray.Count}.bin";
-        var recordDir = Path.GetDirectoryName(filename) + "\\records\\audio\\" + Path.GetFileNameWithoutExtension(filename);
-        Directory.CreateDirectory(recordDir);
-        var recordFilePath = Path.Combine(recordDir, recordFileName);
-        File.WriteAllBytes(recordFilePath, recordData);
+        foreach (var byteArray in byteArrays)
+        {
+          // write record data to file
+          var recordData = byteArray.Value.SelectMany(s => s).ToArray();
+          var isMpeg = recordData[0] == 0x00 && recordData[1] == 0x00 && recordData[2] == 0x01 && recordData[3] == 0xBA;
+          var recordFileName = Path.GetFileNameWithoutExtension(filename) + (isMpeg ? $"_mpeg_a_EOF.bin" : $"_stereo_a_{byteArray.Key}_EOF.bin");
+          var recordDir = Path.GetDirectoryName(filename) + "\\records\\" + Path.GetFileNameWithoutExtension(filename) + "\\audio_stereo\\";
+          Directory.CreateDirectory(recordDir);
+          var recordFilePath = Path.Combine(recordDir, recordFileName);
+          File.WriteAllBytes(recordFilePath,recordData);
+        }
+
       }
     }
 
@@ -135,7 +167,7 @@ namespace Desktop.Helpers
       const int HeaderSize = 24;
       List<SectorInfo> sectorInfoList = new List<SectorInfo>();
 
-      Dictionary<int, List<byte[]>> byteArrays = new Dictionary<int, List<byte[]>>();
+      Dictionary<string, List<byte[]>> byteArrays = new Dictionary<string, List<byte[]>>();
       List<byte[]> recordArray = new List<byte[]>();
 
       for (int i = 0, j = 1; i < fileData.Length; i += ChunkSize)
@@ -166,23 +198,47 @@ namespace Desktop.Helpers
         var bytesToTake = chunk.Length - 24;
         chunk = chunk.Take(bytesToTake).ToArray();
 
-        if (!byteArrays.ContainsKey(sectorInfo.Channel))
+        var bps = sectorInfo.BitsPerSampleString.Replace(" ", "_");
+        var sampleFreq = sectorInfo.SamplingFrequencyString.Replace(" ", "_");
+        var channel = sectorInfo.Channel;
+        var key = $"{sectorInfo.FileNumber}_{channel}_{bps}_{sampleFreq}";
+
+        if (!byteArrays.ContainsKey(key))
         {
-          byteArrays[sectorInfo.Channel] = new List<byte[]>();
+          byteArrays[key] = new List<byte[]>();
         }
-        byteArrays[sectorInfo.Channel].Add(chunk);
+        byteArrays[key].Add(chunk);
+
+        if (sectorInfo.IsEOR || sectorInfo.IsEOF)
+        {
+          foreach (var baKey in byteArrays.Keys)
+          {
+            byte[] recordData = byteArrays[baKey].SelectMany(a => a).ToArray();
+            recordArray.Add(recordData);
+            // write record data to file
+            var recordFileName = Path.GetFileNameWithoutExtension(filename) + $"_mono_a_{baKey}_{recordArray.Count}.bin";
+            var recordDir = Path.GetDirectoryName(filename) + "\\records\\" + Path.GetFileNameWithoutExtension(filename) + "\\audio_mono\\";
+            Directory.CreateDirectory(recordDir);
+            var recordFilePath = Path.Combine(recordDir, recordFileName);
+            File.WriteAllBytes(recordFilePath, recordData);
+          }
+          byteArrays.Clear();
+        }
       }
-      foreach (var channel in byteArrays.Keys)
+      if (byteArrays.Count > 0)
       {
-        byte[] recordData = byteArrays[channel].SelectMany(a => a).ToArray();
-        recordArray.Add(recordData);
-        // write record data to file
-        var recordFileName = Path.GetFileNameWithoutExtension(filename) + $"_mono_a_{recordArray.Count}.bin";
-        var recordDir = Path.GetDirectoryName(filename) + "\\records\\audio\\" + Path.GetFileNameWithoutExtension(filename);
-        Directory.CreateDirectory(recordDir);
-        var recordFilePath = Path.Combine(recordDir, recordFileName);
-        File.WriteAllBytes(recordFilePath, recordData);
+        foreach (var recordData in byteArrays)
+        {
+          // write record data to file
+          var recordFileName = Path.GetFileNameWithoutExtension(filename) + $"_mono_a_{recordData.Key}_EOF.bin";
+          var recordDir = Path.GetDirectoryName(filename) + "\\records\\" + Path.GetFileNameWithoutExtension(filename) + "\\audio_mono\\";
+          Directory.CreateDirectory(recordDir);
+          var recordFilePath = Path.Combine(recordDir, recordFileName);
+          File.WriteAllBytes(recordFilePath, recordData.Value.SelectMany(s => s).ToArray());
+        }
+
       }
+
     }
     
     public static void ProcessRTFFileVideoSectors(byte[] fileData, string filename)
@@ -191,8 +247,8 @@ namespace Desktop.Helpers
       const int Offset = 16;
       const int HeaderSize = 24;
       List<SectorInfo> sectorInfoList = new List<SectorInfo>();
-
-      List<byte[]> byteArrays = new List<byte[]>();
+      var path = Path.GetFileNameWithoutExtension(filename);
+      Dictionary<string, List<byte[]>> byteArrays = new Dictionary<string, List<byte[]>>();
       List<byte[]> recordArray = new List<byte[]>();
 
       for (int i = 0, j = 1; i < fileData.Length; i += ChunkSize)
@@ -219,32 +275,55 @@ namespace Desktop.Helpers
         chunk = chunk.Skip(HeaderSize).ToArray();
         var bytesToTake = chunk.Length - 4;
         chunk = chunk.Take(bytesToTake).ToArray();
-        byteArrays.Add(chunk);
+        chunk = chunk.Take(bytesToTake).ToArray();
+
+        var videoEncoding = sectorInfo.VideoString.Replace(" ", "_");
+        var resolution = sectorInfo.ResolutionString.Replace(" ", "_");
+
+        var channel = sectorInfo.Channel;
+        var key = $"{sectorInfo.FileNumber}_{channel}_{videoEncoding}_{resolution}";
+
+        if (!byteArrays.ContainsKey(key))
+        {
+          byteArrays[key] = new List<byte[]>();
+        }
+        byteArrays[key].Add(chunk);
 
         if (sectorInfo.IsEOR || sectorInfo.IsEOF)
         {
-          WriteRecords(filename, ChunkSize, byteArrays, recordArray, i);
+
+          foreach (var baKey in byteArrays.Keys)
+          {
+            byte[] recordData = byteArrays[baKey].SelectMany(a => a).ToArray();
+            recordArray.Add(recordData);
+            // write record data to file
+            // check if first 4 bytes of recordData is 0x000001BA
+            var isMpeg = recordData[0] == 0x00 && recordData[1] == 0x00 && recordData[2] == 0x01 && recordData[3] == 0xBA;
+            var recordFileName = Path.GetFileNameWithoutExtension(filename) + (isMpeg ? $"_v_mpeg_{recordArray.Count}.bin" : $"_v_{baKey}_{recordArray.Count}.bin");
+            var recordDir = Path.GetDirectoryName(filename) + "\\records\\" + Path.GetFileNameWithoutExtension(filename) + "\\video\\";
+            Directory.CreateDirectory(recordDir);
+            var recordFilePath = Path.Combine(recordDir, recordFileName);
+            File.WriteAllBytes(recordFilePath, recordData);
+          }
+          byteArrays.Clear();
         }
       }
       if (byteArrays.Count > 0)
       {
-        WriteRecords(filename, ChunkSize, byteArrays, recordArray, 1);
+        foreach (var baKey in byteArrays.Keys)
+        {
+          byte[] recordData = byteArrays[baKey].SelectMany(a => a).ToArray();
+          recordArray.Add(recordData);
+          // write record data to file
+          var isMpeg = recordData[0] == 0x00 && recordData[1] == 0x00 && recordData[2] == 0x01 && recordData[3] == 0xBA;
+          var recordFileName = Path.GetFileNameWithoutExtension(filename) + (isMpeg ? $"_v_mpeg_{recordArray.Count}.bin" : $"_v_{baKey}_{recordArray.Count}.bin");
+          var recordDir = Path.GetDirectoryName(filename) + "\\records\\" + Path.GetFileNameWithoutExtension(filename) + "\\video\\";
+          Directory.CreateDirectory(recordDir);
+          var recordFilePath = Path.Combine(recordDir, recordFileName);
+          File.WriteAllBytes(recordFilePath, recordData);
+        }
+        byteArrays.Clear();
       }
-
-    }
-
-    private static void WriteRecords(string filename, int ChunkSize, List<byte[]> byteArrays, List<byte[]> recordArray, int i)
-    {
-      byte[] recordData = byteArrays.SelectMany(a => a).ToArray();
-      recordArray.Add(recordData);
-      // write record data to file
-      var offsets = $"_{i - ((byteArrays.Count - 1) * ChunkSize)}_{i + ChunkSize}";
-      var recordFileName = Path.GetFileNameWithoutExtension(filename) + $"{offsets}_v_{recordArray.Count}.bin";
-      var recordDir = Path.GetDirectoryName(filename) + "\\records\\video\\" + Path.GetFileNameWithoutExtension(filename);
-      Directory.CreateDirectory(recordDir);
-      var recordFilePath = Path.Combine(recordDir, recordFileName);
-      File.WriteAllBytes(recordFilePath, recordData);
-      byteArrays.Clear();
     }
 
     private static List<byte[]> FindClutColorTable(byte[] data)

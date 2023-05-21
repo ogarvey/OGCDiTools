@@ -113,7 +113,6 @@ namespace Desktop.Views
         try
         {
           binFileData = File.ReadAllBytes(filename);
-          var output = Utilities.Contains808FSequence(binFileData);
           if (binFileData.Length > 0)
           {
             isBinLoaded = true;
@@ -333,21 +332,21 @@ namespace Desktop.Views
 
     private void loadDYUVbtn_Click(object sender, EventArgs e)
     {
-      var bytes = GetDyuvBytes();
-      //var pil = DyuvHelper.ToPIL(bytes, 384, 240);
-      //var bitmap = DyuvHelper.ImageSharpToBitmap(pil);
-      var bitmap = new Bitmap(384, 240);
-      if (bytes.Length / 384 != 240)
-      {
-        bitmap = Utilities.DecodeDYUVImage(bytes, 384, bytes.Length / 384);
-      }
-      else
-      {
-        bitmap = Utilities.DecodeDYUVImage(bytes);
-      }
-      pictureBox1.Size = new Size(1536, 960);
-      pictureBox1.Image = BitmapHelper.Scale4(bitmap);
-      pictureBox1.Visible = true;
+      //var bytes = GetDyuvBytes();
+      ////var pil = DyuvHelper.ToPIL(bytes, 384, 240);
+      ////var bitmap = DyuvHelper.ImageSharpToBitmap(pil);
+      //var bitmap = new Bitmap(384, 240);
+      //if (bytes.Length / 384 != 240)
+      //{
+      //  bitmap = Utilities.DecodeDYUVImage(bytes, 384, bytes.Length / 384);
+      //}
+      //else
+      //{
+      //  bitmap = Utilities.DecodeDYUVImage(bytes);
+      //}
+      //pictureBox1.Size = new Size(1536, 960);
+      //pictureBox1.Image = BitmapHelper.Scale4(bitmap);
+      //pictureBox1.Visible = true;
     }
 
     private byte[] GetDyuvBytes()

@@ -19,6 +19,7 @@ namespace Desktop.Views.Imagery
     private byte[] _binFileBytes;
     private byte[] _dyuvBytes;
     private string _filename;
+    
     public DYUVForm(byte[] binFile, string filename)
     {
       InitializeComponent();
@@ -30,7 +31,7 @@ namespace Desktop.Views.Imagery
 
     private byte[] GetDyuvBytes()
     {
-      var bytesToRead = 92160;
+      var bytesToRead = 45504;
       if (_binFileBytes.Length == bytesToRead)
       {
         return _binFileBytes;
@@ -44,17 +45,20 @@ namespace Desktop.Views.Imagery
 
     private void DisplayDyuvImage()
     {
-      var bitmap = new Bitmap(384, 240);
-      if (_dyuvBytes.Length / 384 != 240)
+      var width = 384;
+      var height = 240;
+      var bitmap = new Bitmap(width, height);
+      if (_dyuvBytes.Length / width != height)
       {
-        bitmap = Utilities.DecodeDYUVImage(_dyuvBytes, 384, _dyuvBytes.Length / 384);
+        bitmap = Utilities.DecodeDYUVImage(_dyuvBytes, width, _dyuvBytes.Length / width);
       }
       else
       {
-        bitmap = Utilities.DecodeDYUVImage(_dyuvBytes);
+        bitmap = Utilities.DecodeDYUVImage(_dyuvBytes, width, height);
       }
-      pictureBox1.Size = new Size(768, 560);
+      pictureBox1.Size = new Size(width, height);
       pictureBox1.Image = BitmapHelper.Scale4(bitmap);
+      //pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
       pictureBox1.Visible = true;
     }
 
@@ -84,7 +88,7 @@ namespace Desktop.Views.Imagery
 
         var numericUpDown2 = new NumericUpDown();
         numericUpDown2.Location = new Point(10, 110);
-        numericUpDown2.Maximum = 92160;
+        numericUpDown2.Maximum = int.MaxValue;
         numericUpDown2.Value = 92160;
         dialog.Controls.Add(numericUpDown2);
 

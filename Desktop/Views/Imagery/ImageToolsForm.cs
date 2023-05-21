@@ -64,57 +64,57 @@ namespace Desktop.Views.Imagery
           binFileData = File.ReadAllBytes(filename);
           if (binFileData.Length > 0 && BinFileHelper.IsMainDataFile(filename))
           {
-            List<List<ImageLine>> imagesAsLines = new List<List<ImageLine>>();
-            List<Bitmap> bitmaps = new List<Bitmap>();
-            var blobs = GetSpriteBlobs(binFileData.Skip(67848).Take(56574).ToArray());
-            foreach (var (item,index) in blobs.WithIndex())
-            {
-              var outputDir = Path.GetDirectoryName(filename) + "\\output\\sprites";
-              var binOutputDir = Path.GetDirectoryName(filename) + "\\output\\bins";
-              Directory.CreateDirectory(outputDir);
-              Directory.CreateDirectory(binOutputDir);
-              var spriteBinFile = Path.Combine(binOutputDir, Path.GetFileNameWithoutExtension(filename) + $"_{index}.bin");
-              File.WriteAllBytes(spriteBinFile, item);
-              var imageLines = DecodeImage(item);
-              imagesAsLines.Add(imageLines);
-              var bitmap = CreateBitmapFromImageLines(imageLines, colors);
-              if (bitmap != null)
-              {
-                var bitmapScaled = BitmapHelper.Scale4(bitmap);
-                bitmap.Save(Path.Combine(outputDir, Path.GetFileNameWithoutExtension(filename) + $"_{index}.png"));
-                bitmapScaled.Save(Path.Combine(outputDir, Path.GetFileNameWithoutExtension(filename) + $"_{index}_upscaled.png"));
-              }
-            }
+            //List<List<ImageLine>> imagesAsLines = new List<List<ImageLine>>();
+            //List<Bitmap> bitmaps = new List<Bitmap>();
+            //var blobs = GetSpriteBlobs(binFileData.Skip(67848).Take(56574).ToArray());
+            //foreach (var (item,index) in blobs.WithIndex())
+            //{
+            //  var outputDir = Path.GetDirectoryName(filename) + "\\output\\sprites";
+            //  var binOutputDir = Path.GetDirectoryName(filename) + "\\output\\bins";
+            //  Directory.CreateDirectory(outputDir);
+            //  Directory.CreateDirectory(binOutputDir);
+            //  var spriteBinFile = Path.Combine(binOutputDir, Path.GetFileNameWithoutExtension(filename) + $"_{index}.bin");
+            //  File.WriteAllBytes(spriteBinFile, item);
+            //  var imageLines = DecodeImage(item);
+            //  imagesAsLines.Add(imageLines);
+            //  var bitmap = CreateBitmapFromImageLines(imageLines, colors);
+            //  if (bitmap != null)
+            //  {
+            //    var bitmapScaled = BitmapHelper.Scale4(bitmap);
+            //    bitmap.Save(Path.Combine(outputDir, Path.GetFileNameWithoutExtension(filename) + $"_{index}.png"));
+            //    bitmapScaled.Save(Path.Combine(outputDir, Path.GetFileNameWithoutExtension(filename) + $"_{index}_upscaled.png"));
+            //  }
+            //}
             isBinLoaded = true;
             parseDyuvBtn.Enabled = true;
             screenImageBtn.Enabled = true;
           } else if (binFileData.Length >= 100352)
           {
-            ExtractPalette();
-            List<List<ImageLine>> imagesAsLines = new List<List<ImageLine>>();
-            List<Bitmap> bitmaps = new List<Bitmap>();
-            var blobs = GetSpriteBlobs(binFileData.Skip(98400).ToArray());
-            foreach (var (item, index) in blobs.WithIndex())
-            {
-              var outputDir = Path.GetDirectoryName(filename) + "\\output";
-              var binOutputDir = Path.GetDirectoryName(filename) + "\\output\\bins";
-              Directory.CreateDirectory(outputDir);
-              Directory.CreateDirectory(binOutputDir);
-              var spriteBinFile = Path.Combine(binOutputDir, Path.GetFileNameWithoutExtension(filename) + $"_{index}.bin");
-              File.WriteAllBytes(spriteBinFile, item);
-              var imageLines = DecodeImage(item);
-              imagesAsLines.Add(imageLines);
-              if (imageLines.Count > 5 && imageLines.Count < 150)
-              {
-                var bitmap = CreateBitmapFromImageLines(imageLines, colors);
-                if (bitmap != null)
-                {
-                  var bitmapScaled = BitmapHelper.Scale4(bitmap);
-                  bitmap.Save(Path.Combine(outputDir, Path.GetFileNameWithoutExtension(filename) + $"_{index}.png"));
-                  bitmapScaled.Save(Path.Combine(outputDir, Path.GetFileNameWithoutExtension(filename) + $"_{index}_upscaled.png"));
-                }
-              }
-            }
+            //ExtractPalette();
+            //List<List<ImageLine>> imagesAsLines = new List<List<ImageLine>>();
+            //List<Bitmap> bitmaps = new List<Bitmap>();
+            //var blobs = GetSpriteBlobs(binFileData.Skip(98400).ToArray());
+            //foreach (var (item, index) in blobs.WithIndex())
+            //{
+            //  var outputDir = Path.GetDirectoryName(filename) + "\\output";
+            //  var binOutputDir = Path.GetDirectoryName(filename) + "\\output\\bins";
+            //  Directory.CreateDirectory(outputDir);
+            //  Directory.CreateDirectory(binOutputDir);
+            //  var spriteBinFile = Path.Combine(binOutputDir, Path.GetFileNameWithoutExtension(filename) + $"_{index}.bin");
+            //  File.WriteAllBytes(spriteBinFile, item);
+            //  var imageLines = DecodeImage(item);
+            //  imagesAsLines.Add(imageLines);
+            //  if (imageLines.Count > 5 && imageLines.Count < 150)
+            //  {
+            //    var bitmap = CreateBitmapFromImageLines(imageLines, colors);
+            //    if (bitmap != null)
+            //    {
+            //      var bitmapScaled = BitmapHelper.Scale4(bitmap);
+            //      bitmap.Save(Path.Combine(outputDir, Path.GetFileNameWithoutExtension(filename) + $"_{index}.png"));
+            //      bitmapScaled.Save(Path.Combine(outputDir, Path.GetFileNameWithoutExtension(filename) + $"_{index}_upscaled.png"));
+            //    }
+            //  }
+            //}
             isBinLoaded = true;
             parseDyuvBtn.Enabled = true;
             screenImageBtn.Enabled = true;

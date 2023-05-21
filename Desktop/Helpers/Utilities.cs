@@ -7,47 +7,54 @@ namespace Desktop.Helpers
 {
   public static class Utilities
   {
-    public static int[] Contains808FSequence(byte[] data)
+    public static List<int> ConvertPlayerByteSequenceToIntList(byte[] byteSequence)
     {
-      const int MaxSequenceLength = 64;
-      byte[] sequence = new byte[MaxSequenceLength];
-      int sequenceLength = 0;
-      int[] offsets = new int[65535];
-      int foundOffsets = 0;
-
-      for (int i = 0; i < data.Length; i++)
+      if (byteSequence == null || byteSequence.Length != 156)
       {
-        if (data[i] >= 0x01 && data[i] <= 0x1A)
-        {
-          sequence[sequenceLength++] = data[i];
-
-          if (sequenceLength == MaxSequenceLength)
-          {
-            // Found a sequence of 64 bytes
-            offsets[foundOffsets++] = i - MaxSequenceLength;
-            sequenceLength = 0;
-          }
-        }
-        else
-        {
-          // Reset the current sequence
-          sequenceLength = 0;
-        }
+        return new List<int>();
       }
 
-      // No sequence of 64 bytes found
-      return offsets;
+      var result = new List<int>();
+
+      for (int i = 0; i < byteSequence.Length; i += 2)
+      {
+        byte[] bytePair = new byte[] { byteSequence[i + 1], byteSequence[i] }; // Reverse the byte order
+
+        int value = BitConverter.ToUInt16(bytePair, 0);
+        result.Add(value);
+      }
+
+      return result;
+    }
+    public static List<int> ConvertNPCByteSequenceToIntList(byte[] byteSequence)
+    {
+      if (byteSequence == null || byteSequence.Length != 12)
+      {
+        return new List<int>();
+      }
+
+      var result = new List<int>();
+
+      for (int i = 0; i < byteSequence.Length; i += 2)
+      {
+        byte[] bytePair = new byte[] { byteSequence[i + 1], byteSequence[i] }; // Reverse the byte order
+
+        int value = BitConverter.ToInt16(bytePair, 0);
+        result.Add(value);
+      }
+
+      return result;
     }
 
     private readonly static int[] dequantizer = { 0, 1, 4, 9, 16, 27, 44, 79, 128, 177, 212, 229, 240, 247, 252, 255 };
 
     //decode DYUV image to RGB bitmap
-    public static Bitmap DecodeDYUVImage(byte[] encodedData, int Width = 384, int Height = 240)
+    public static Bitmap DecodeDYUVImage(byte[] encodedData, int Width, int Height)
     {
       int encodedIndex = 0;                               //reader index
       int width = Width, height = Height;                      //output dimensions
       byte[] decodedImage = new byte[width * height * 4]; //decoded image array
-      uint initialY = 16;    //initial Y value (per line)
+      uint initialY = 128;    //initial Y value (per line)
       uint initialU = 128;    //initial U value (per line)
       uint initialV = 128;    //initial V value (per line)
 

@@ -22,31 +22,59 @@ namespace Desktop.Views
     public RTFForm()
     {
       InitializeComponent();
-      openFileDialog1 = new OpenFileDialog()
+      folderBrowserDialog1 = new FolderBrowserDialog()
       {
-        FileName = "Select an RTF file",
-        Filter = "RTF files (*.rtf)|*.rtf",
-        Title = "Open RTF file"
+        UseDescriptionForTitle = true,
+        Description = "Select RTF Folder"
       };
-      if (openFileDialog1.ShowDialog() == DialogResult.OK)
+      if(folderBrowserDialog1.ShowDialog() == DialogResult.OK)
       {
-        this.Text = filename = openFileDialog1.FileName;
-        spaceForm1.Text = $"RTF Tools - {filename}";
-        try
+        filename = folderBrowserDialog1.SelectedPath;
+        filenames = Directory.GetFiles(filename, "*.*").ToList();
+        foreach(string file in filenames)
         {
-          fileData = File.ReadAllBytes(filename);
-          fileSectors = CdiFileHelper.ProcessRTFFileDataSectors(fileData, filename);
-          CdiFileHelper.ProcessRTFFileStereoAudioSectors(fileData, filename);
-          CdiFileHelper.ProcessRTFFileMonoAudioSectors(fileData, filename);
-          CdiFileHelper.ProcessRTFFileVideoSectors(fileData, filename);
-          UpdateStats();
-        }
-        catch (Exception)
-        {
+          try
+          {
+            fileData = File.ReadAllBytes(file);
+            fileSectors = CdiFileHelper.ProcessRTFFileDataSectors(fileData, file);
+            CdiFileHelper.ProcessRTFFileStereoAudioSectors(fileData, file);
+            CdiFileHelper.ProcessRTFFileMonoAudioSectors(fileData, file);
+            CdiFileHelper.ProcessRTFFileVideoSectors(fileData, file);
+            UpdateStats();
+            MessageBox.Show($"Processed: {file}", "Result", MessageBoxButtons.OK, MessageBoxIcon.Information);
+          }
+          catch (Exception)
+          {
 
-          throw;
+            throw;
+          }
         }
       }
+      //openFileDialog1 = new OpenFileDialog()
+      //{
+      //  FileName = "Select an RTF file",
+      //  Filter = "RTF files (*.rtf)|*.rtf",
+      //  Title = "Open RTF file"
+      //};
+      //if (openFileDialog1.ShowDialog() == DialogResult.OK)
+      //{
+      //  this.Text = filename = openFileDialog1.FileName;
+      //  spaceForm1.Text = $"RTF Tools - {filename}";
+      //  try
+      //  {
+      //    fileData = File.ReadAllBytes(filename);
+      //    fileSectors = CdiFileHelper.ProcessRTFFileDataSectors(fileData, filename);
+      //    CdiFileHelper.ProcessRTFFileStereoAudioSectors(fileData, filename);
+      //    CdiFileHelper.ProcessRTFFileMonoAudioSectors(fileData, filename);
+      //    CdiFileHelper.ProcessRTFFileVideoSectors(fileData, filename);
+      //    UpdateStats();
+      //  }
+      //  catch (Exception)
+      //  {
+
+      //    throw;
+      //  }
+      //}
     }
 
     private void hexButton_Click(object sender, EventArgs e)

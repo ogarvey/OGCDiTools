@@ -49,6 +49,7 @@ namespace Desktop.Helpers.Imagery
       public List<byte> Pixels { get; set; }
       public int RemainingPixels { get; set; }
     }
+
     public static List<ImageLine> DecodeImage(byte[] data)
     {
       List<ImageLine> imageLines = new List<ImageLine>();
@@ -56,58 +57,97 @@ namespace Desktop.Helpers.Imagery
 
       while (i < data.Length - 1)
       {
-        if (data[i] == 0x00)
-        {
-          ImageLine line = new ImageLine();
-          line.LeftOffset = data[i + 1];
-          line.Pixels = new List<byte>();
-          i += 2;
 
-          while (i < data.Length - 1)
+        ImageLine line = new ImageLine();
+        if (data[i] == 0x00 && data[i + 1] != 0x38)
+        {
+          line.LeftOffset = data[i + 1];
+          i += 2;
+        }
+        else if (data[i] == 0x00 && data[i + 1] == 0x38)
+        {
+          line.LeftOffset = 0;
+          line.Pixels = new List<byte>();
+          for (int j = 0; j < 56; j++)
           {
-            if (data[i] == 0x00)
+            line.Pixels.Add(0x00);
+            if (line.LeftOffset + line.Pixels.Count == 56)
             {
-              if (i + 2 < data.Length && data[i + 2] == 0x00)
+              break;
+            }
+          }
+        }
+        else
+        {
+          line.LeftOffset = 0;
+        }
+        line.Pixels = new List<byte>();
+
+        while (i < data.Length - 1)
+        {
+          if (line.LeftOffset + line.Pixels.Count == 56)
+          {
+            imageLines.Add(line);
+            break;
+          }
+          if (data[i] == 0x00)
+          {
+            if (line.LeftOffset + line.Pixels.Count == 56)
+            {
+              imageLines.Add(line);
+              break;
+            }
+            if (i + 2 < data.Length && data[i + 2] == 0x00)
+            {
+              line.RemainingPixels = data[i + 1];
+              i += 2;
+              if (line.LeftOffset + line.Pixels.Count == 56)
               {
-                line.RemainingPixels = data[i + 1];
-                i += 2;
+                imageLines.Add(line);
                 break;
               }
-              else
-              {
-                int numberOfNullBytes = data[i + 1];
-                for (int j = 0; j < numberOfNullBytes; j++)
-                {
-                  line.Pixels.Add(0x00);
-                }
-                i += 2;
-              }
+              break;
             }
             else
             {
-              line.Pixels.Add(data[i]);
-              i++;
+              int numberOfNullBytes = data[i + 1];
+              for (int j = 0; j < numberOfNullBytes; j++)
+              {
+                line.Pixels.Add(0x00);
+                if (line.LeftOffset + line.Pixels.Count == 56)
+                {
+                  break;
+                }
+              }
+              i += 2;
             }
-
-            if (i >= data.Length - 1 || imageLines.Count > 0 && (line.Pixels.Count == imageLines[0].RemainingPixels + imageLines[0].LeftOffset + imageLines[0].Pixels.Count))
+          }
+          else
+          {
+            line.Pixels.Add(data[i]);
+            i++;
+            if (line.LeftOffset + line.Pixels.Count == 56)
             {
               imageLines.Add(line);
               break;
             }
           }
 
-          imageLines.Add(line);
+          if (i >= data.Length - 1 || ((line.LeftOffset + line.Pixels.Count) == 56))
+          {
+            imageLines.Add(line);
+            break;
+          }
         }
-        else
-        {
-          i++;
-        }
+
+        imageLines.Add(line);
+
       }
 
       return imageLines;
     }
 
-    public static Bitmap CreateBitmapFromImageLines(List<ImageLine> imageLines, List<Color> colorPalette)
+    public static Bitmap CreateBitmapFromImageLines(List<ImageLine> imageLines, List<Color> colorPalette, bool isplayer = false)
     {
       try
       {
@@ -134,7 +174,7 @@ namespace Desktop.Helpers.Imagery
             {
               bitmap.SetPixel(x, currentLine, Color.Transparent);
             }
-            else if ((currentByte & 0xF0) == 0xD0)
+            else if (!isplayer && ((currentByte & 0xF0) == 0xD0) || isplayer && (currentByte & 0xF0) == 0xC0)
             {
               byte colorIndex = (byte)(currentByte & 0x0F);
               Color color = colorPalette[colorIndex];

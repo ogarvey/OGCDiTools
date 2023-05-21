@@ -58,7 +58,7 @@ namespace Desktop
       spaceForm1.Font = new Font("Verdana", 8F, FontStyle.Regular, GraphicsUnit.Point);
       spaceForm1.Image = null;
       spaceForm1.Location = new Point(0, 0);
-      spaceForm1.Margin = new Padding(4, 4, 4, 4);
+      spaceForm1.Margin = new Padding(4);
       spaceForm1.MinimumSize = new Size(250, 31);
       spaceForm1.Movable = true;
       spaceForm1.Name = "spaceForm1";
@@ -77,7 +77,7 @@ namespace Desktop
       // 
       splitContainer1.Dock = DockStyle.Fill;
       splitContainer1.Location = new Point(6, 31);
-      splitContainer1.Margin = new Padding(4, 4, 4, 4);
+      splitContainer1.Margin = new Padding(4);
       splitContainer1.Name = "splitContainer1";
       // 
       // splitContainer1.Panel1
@@ -96,7 +96,7 @@ namespace Desktop
       nightPanel1.ForeColor = System.Drawing.Color.FromArgb(250, 250, 250);
       nightPanel1.LeftSideColor = System.Drawing.Color.FromArgb(242, 93, 89);
       nightPanel1.Location = new Point(0, 0);
-      nightPanel1.Margin = new Padding(4, 4, 4, 4);
+      nightPanel1.Margin = new Padding(4);
       nightPanel1.Name = "nightPanel1";
       nightPanel1.RightSideColor = System.Drawing.Color.FromArgb(41, 44, 61);
       nightPanel1.Side = ReaLTaiizor.Controls.NightPanel.PanelSide.Left;
@@ -114,7 +114,7 @@ namespace Desktop
       tableLayoutPanel1.Controls.Add(audioToolsBtn, 0, 2);
       tableLayoutPanel1.Dock = DockStyle.Fill;
       tableLayoutPanel1.Location = new Point(0, 0);
-      tableLayoutPanel1.Margin = new Padding(4, 4, 4, 4);
+      tableLayoutPanel1.Margin = new Padding(4);
       tableLayoutPanel1.Name = "tableLayoutPanel1";
       tableLayoutPanel1.RowCount = 4;
       tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 33.33444F));
@@ -149,7 +149,7 @@ namespace Desktop
       exitBtn.Font = new Font("Verdana", 8F, FontStyle.Regular, GraphicsUnit.Point);
       exitBtn.Image = null;
       exitBtn.Location = new Point(4, 1447);
-      exitBtn.Margin = new Padding(4, 4, 4, 4);
+      exitBtn.Margin = new Padding(4);
       exitBtn.Name = "exitBtn";
       exitBtn.NoRounding = false;
       exitBtn.Size = new Size(508, 118);

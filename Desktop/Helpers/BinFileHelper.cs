@@ -35,6 +35,48 @@ namespace Desktop.Helpers
 
     }
 
+    public static int GetBinFileNumber(string file)
+    {
+      string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(file);
+      if (fileNameWithoutExtension.Length > 0)
+      {
+        int lastUnderscoreIndex = fileNameWithoutExtension.LastIndexOf('_');
+        if (lastUnderscoreIndex != -1 && lastUnderscoreIndex < fileNameWithoutExtension.Length - 1)
+        {
+          string numericPart = fileNameWithoutExtension.Substring(lastUnderscoreIndex + 1);
+          if (Int32.TryParse(numericPart, out int lastDigits) && lastDigits > 0)
+          {
+            return lastDigits;
+          }
+        }
+      }
+      return 0;
+    }
+
+    public static string GetMainDataFile(string path)
+    {
+      string[] files = Directory.GetFiles(path, "*.bin");
+      List<string> matchingFiles = new List<string>();
+
+      foreach (string file in files)
+      {
+        string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(file);
+        if (fileNameWithoutExtension.Length > 0)
+        {
+          int lastUnderscoreIndex = fileNameWithoutExtension.LastIndexOf('_');
+          if (lastUnderscoreIndex != -1 && lastUnderscoreIndex < fileNameWithoutExtension.Length - 1)
+          {
+            string numericPart = fileNameWithoutExtension.Substring(lastUnderscoreIndex + 1);
+            if (Int32.TryParse(numericPart, out int lastDigits) && lastDigits == 5)
+            {
+              return file;
+            }
+          }
+        }
+      }
+      return null;
+    }
+
     public static bool IsMainDataFile(string path)
     {
       string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(path);

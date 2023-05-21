@@ -48,6 +48,7 @@
       trackBar1 = new ReaLTaiizor.Controls.TrackBar();
       openFileDialog1 = new OpenFileDialog();
       timer1 = new System.Windows.Forms.Timer(components);
+      exportAudioBtn = new ReaLTaiizor.Controls.SpaceButton();
       spaceForm1.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
       splitContainer1.Panel1.SuspendLayout();
@@ -100,6 +101,7 @@
       // 
       // splitContainer1.Panel2
       // 
+      splitContainer1.Panel2.Controls.Add(exportAudioBtn);
       splitContainer1.Panel2.Controls.Add(spaceLabel1);
       splitContainer1.Panel2.Controls.Add(trackBar1);
       splitContainer1.Size = new System.Drawing.Size(988, 525);
@@ -144,7 +146,7 @@
       // loadAudioFileBtn
       // 
       loadAudioFileBtn.Customization = "Kioq/zIyMv8yMjL/Kioq/y8vL/8nJyf//v7+/yMjI/8qKir/";
-      loadAudioFileBtn.Dock = DockStyle.Fill;
+      loadAudioFileBtn.Dock = DockStyle.Top;
       loadAudioFileBtn.Font = new Font("Verdana", 8F, FontStyle.Regular, GraphicsUnit.Point);
       loadAudioFileBtn.Image = null;
       loadAudioFileBtn.Location = new System.Drawing.Point(12, 12);
@@ -330,6 +332,21 @@
       timer1.Interval = 1000;
       timer1.Tick += timer_Tick;
       // 
+      // exportAudioBtn
+      // 
+      exportAudioBtn.Customization = "Kioq/zIyMv8yMjL/Kioq/y8vL/8nJyf//v7+/yMjI/8qKir/";
+      exportAudioBtn.Font = new Font("Verdana", 8F, FontStyle.Regular, GraphicsUnit.Point);
+      exportAudioBtn.Image = null;
+      exportAudioBtn.Location = new System.Drawing.Point(12, 199);
+      exportAudioBtn.Name = "exportAudioBtn";
+      exportAudioBtn.NoRounding = false;
+      exportAudioBtn.Size = new System.Drawing.Size(209, 53);
+      exportAudioBtn.TabIndex = 2;
+      exportAudioBtn.Text = "Export Audio";
+      exportAudioBtn.TextAlignment = HorizontalAlignment.Center;
+      exportAudioBtn.Transparent = false;
+      exportAudioBtn.Click += exportAudioBtn_Click;
+      // 
       // AudioPlayerForm
       // 
       AutoScaleDimensions = new System.Drawing.SizeF(10F, 25F);
@@ -380,5 +397,6 @@
     private GroupBox groupBox3;
     private RadioButton eightBitsRadio;
     private RadioButton fourBpsRadio;
+    private ReaLTaiizor.Controls.SpaceButton exportAudioBtn;
   }
 }

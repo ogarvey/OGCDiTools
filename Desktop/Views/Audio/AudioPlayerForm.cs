@@ -21,7 +21,8 @@ namespace Desktop.Views.Audio
     private byte[] binFileData;
     private bool isBinLoaded;
     private bool isMono = false;
-
+    private List<short> _left;
+    private List<short> _right;
     public AudioPlayerForm()
     {
       InitializeComponent();
@@ -86,7 +87,15 @@ namespace Desktop.Views.Audio
     {
       // Call DecodeAudioSector here with the data parameter, left, and right
       // ...
-      DecodeAudioSector(data, left, right, bps == 8, !isMono);
+      try
+      {
+        DecodeAudioSector(data, left, right, bps == 8, !isMono);
+      } 
+      catch
+      {
+        MessageBox.Show("Error Decoding Audio Sector", "Audio Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        return;
+      }
     }
 
     private WaveOut waveOut;
@@ -111,7 +120,7 @@ namespace Desktop.Views.Audio
       }
 
       memoryStream = new MemoryStream();
-      AudioHelper.WriteWAV(memoryStream, header, left, right);
+      WriteWAV(memoryStream, header, left, right);
 
       memoryStream.Position = 0;
       waveFileReader = new WaveFileReader(memoryStream);
@@ -175,6 +184,32 @@ namespace Desktop.Views.Audio
     private void eightBitsRadio_CheckedChanged(object sender, EventArgs e)
     {
       bps = 8;
+    }
+
+    private void exportAudioBtn_Click(object sender, EventArgs e)
+    {
+      List<short> left = new List<short>();
+      List<short> right = new List<short>();
+
+      for (int i = 0; i < binFileData.Length; i += 2304)
+      {
+        byte[] chunk = new byte[2304];
+        Array.Copy(binFileData, i, chunk, 0, 2304);
+        ProcessAudioData(chunk, left, right);
+      }
+
+      WAVHeader wavHeader = new WAVHeader
+      {
+        ChannelNumber = (ushort)(isMono ? 1 : 2), // Mono
+        Frequency = frequency, // 18.9 kHz
+      };
+      Directory.CreateDirectory(Path.GetDirectoryName(filename) + "\\wav_files");
+      var outputPath = Path.Combine(Path.GetDirectoryName(filename) + "\\wav_files", Path.GetFileNameWithoutExtension(filename) + ".wav");
+
+      using (FileStream fileStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
+      {
+        WriteWAV(fileStream, wavHeader, left, right);
+      }
     }
   }
 }
